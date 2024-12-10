@@ -45,7 +45,9 @@ export class Google {
     }
     public static getAuthUrl() {
         const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-        const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+        const redirectUri =
+            process.env.NEXT_PUBLIC_HOST +
+            '/api/google-auth/code-connect/callback';
 
         const scope = 'https://www.googleapis.com/auth/calendar';
 

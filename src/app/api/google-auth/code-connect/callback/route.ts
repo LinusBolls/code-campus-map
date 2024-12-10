@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
                 code,
                 client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
                 client_secret: process.env.GOOGLE_CLIENT_SECRET,
-                redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI,
+                redirect_uri:
+                    process.env.NEXT_PUBLIC_HOST +
+                    '/api/google-auth/code-connect/callback',
                 grant_type: 'authorization_code',
             }),
         });
@@ -39,7 +41,9 @@ export async function GET(req: NextRequest) {
 
         const { access_token, refresh_token, expires_in } = data;
 
-        const response = NextResponse.redirect(new URL('/', req.url));
+        const response = NextResponse.redirect(
+            new URL(process.env.NEXT_PUBLIC_HOST!, req.url)
+        );
 
         const expiresAt = dayjs().add(expires_in, 'seconds');
 

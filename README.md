@@ -18,3 +18,7 @@ You'll need to sign in with your CODE Google account.
 
 ![Screenshot 1](/docs/screenshot-1.png)
 ![Screenshot 2](/docs/screenshot-2.png)
+
+## How it works
+
+Currently, we only pull data from two of the CODE Google Calendars to see Google Events that are currently in progress. In the future, we will also pull data from the CODE Learning Platform (intranet of CODE University) to show additional info about events.

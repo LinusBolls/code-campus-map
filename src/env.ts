@@ -1,6 +1,6 @@
-const assertEnvString = (value: unknown): string => {
+const assertEnvString = (value: unknown, key: string): string => {
     if (typeof value !== 'string')
-        throw new Error('Missing string value process.env.' + name);
+        throw new Error('Missing string value process.env.' + key);
 
     return value;
 };
@@ -8,22 +8,33 @@ const assertEnvString = (value: unknown): string => {
 class Env {
     public get client() {
         return {
-            host: assertEnvString(process.env.NEXT_PUBLIC_HOST),
+            host: assertEnvString(
+                process.env.NEXT_PUBLIC_HOST,
+                'NEXT_PUBLIC_HOST'
+            ),
             google: {
                 clientId: assertEnvString(
-                    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+                    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                    'NEXT_PUBLIC_GOOGLE_CLIENT_ID'
                 ),
             },
         };
     }
     public get server() {
         return {
-            host: assertEnvString(process.env.NEXT_PUBLIC_HOST),
+            host: assertEnvString(
+                process.env.NEXT_PUBLIC_HOST,
+                'NEXT_PUBLIC_HOST'
+            ),
             google: {
                 clientId: assertEnvString(
-                    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+                    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                    'NEXT_PUBLIC_GOOGLE_CLIENT_ID'
                 ),
-                clientSecret: assertEnvString(process.env.GOOGLE_CLIENT_SECRET),
+                clientSecret: assertEnvString(
+                    process.env.GOOGLE_CLIENT_SECRET,
+                    'GOOGLE_CLIENT_SECRET'
+                ),
             },
         };
     }

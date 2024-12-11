@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import { NextRequest, NextResponse } from 'next/server';
 
+import { env } from '@/env';
+
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get('code');
@@ -20,11 +22,10 @@ export async function GET(req: NextRequest) {
             },
             body: JSON.stringify({
                 code,
-                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-                client_secret: process.env.GOOGLE_CLIENT_SECRET,
+                client_id: env.server.google.clientId,
+                client_secret: env.server.google.clientSecret,
                 redirect_uri:
-                    process.env.NEXT_PUBLIC_HOST +
-                    '/api/google-auth/code-connect/callback',
+                    env.server.host + '/api/google-auth/code-connect/callback',
                 grant_type: 'authorization_code',
             }),
         });
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
         const { access_token, refresh_token, expires_in } = data;
 
         const response = NextResponse.redirect(
-            new URL(process.env.NEXT_PUBLIC_HOST!, req.url)
+            new URL(env.server.host, req.url)
         );
 
         const expiresAt = dayjs().add(expires_in, 'seconds');

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 
+import { env } from '@/env';
 import { parseCookies } from '@/utils/parseCookies';
 
 import { fetchGoogleCalendarEvents } from './calendarEvents';
@@ -19,14 +20,19 @@ export class Google {
     ) {}
 
     public roomSchedules = {
-        get: (async (roomIds: string[]) =>
-            fetchGoogleRoomSchedules(this.accessToken, roomIds)).bind(this),
+        get: (async (roomIds: string[]) => {
+            await this.tryToRefreshAcessToken();
+            return await fetchGoogleRoomSchedules(this.accessToken, roomIds);
+        }).bind(this),
     };
     public calendarEvents = {
-        get: (async (calendarIds: string[]) =>
-            fetchGoogleCalendarEvents(this.accessToken, calendarIds)).bind(
-            this
-        ),
+        get: (async (calendarIds: string[]) => {
+            await this.tryToRefreshAcessToken();
+            return await fetchGoogleCalendarEvents(
+                this.accessToken,
+                calendarIds
+            );
+        }).bind(this),
     };
     public static fromBrowserCookies() {
         if (typeof window === 'undefined') {
@@ -44,15 +50,53 @@ export class Google {
         return new Google(accessToken, refreshToken, dayjs(expiresAt));
     }
     public static getAuthUrl() {
-        const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+        const clientId = env.client.google.clientId;
         const redirectUri =
-            process.env.NEXT_PUBLIC_HOST +
-            '/api/google-auth/code-connect/callback';
+            env.client.host + '/api/google-auth/code-connect/callback';
 
         const scope = 'https://www.googleapis.com/auth/calendar';
 
         const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline&prompt=consent`;
 
         return googleAuthUrl;
+    }
+
+    public shouldRefreshAccessToken() {
+        if (!this.expiresAt) {
+            return false;
+        }
+        const now = dayjs();
+
+        return (
+            now.isBetween(
+                dayjs(this.expiresAt).subtract(1, 'minutes'),
+                this.expiresAt
+            ) || now.isAfter(this.expiresAt)
+        );
+    }
+    public tryToRefreshAcessToken() {
+        if (this.shouldRefreshAccessToken()) {
+            return this.refreshAccessToken();
+        }
+    }
+
+    public async refreshAccessToken() {
+        if (typeof window !== 'undefined') {
+            const res = await fetch(
+                '/api/google-auth/code-connect/refresh-token',
+                {
+                    method: 'POST',
+                }
+            );
+            const { accessToken, expiresAt } = await res.json();
+
+            this.accessToken = accessToken;
+            this.expiresAt = expiresAt;
+
+            return;
+        }
+        throw new Error(
+            "Google.refreshAccessToken: Can't refresh token in non-browser environment"
+        );
     }
 }

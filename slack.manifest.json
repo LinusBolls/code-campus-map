@@ -1,0 +1,31 @@
+{
+    "display_information": {
+        "name": "CODE Campus Screen",
+        "description": "Post an announcement in #campus-screen to have it broadcasted onto the TV screens on campus!",
+        "background_color": "#222222",
+        "long_description": "Post an announcement in #campus-screen to have it broadcasted onto the TV screens on campus!\r\n\r\nThis is an inofficial student project and not run by CODE staff. For questions and inquiries please contact linus.bolls@code.berlin ツ"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "CODE Campus Screen",
+            "always_online": false
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "channels:history",
+                "channels:read",
+                "emoji:read",
+                "files:read",
+                "reactions:write",
+                "users:read"
+            ]
+        }
+    },
+    "settings": {
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": false,
+        "token_rotation_enabled": false
+    }
+}

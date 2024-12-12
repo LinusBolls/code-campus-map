@@ -21,4 +21,16 @@ You'll need to sign in with your CODE Google account.
 
 ## How it works
 
-Currently, we only pull data from two of the CODE Google Calendars to see Google Events that are currently in progress. In the future, we will also pull data from the CODE Learning Platform (intranet of CODE University) to show additional info about events.
+We pull data from multiple data sources:
+
+### Google
+
+On the first slide, the map with the highlighted bookings and events is generated based on data from Google Calendar. The user has to sign in, and we fetch these events from their calendar.
+
+### Slack
+
+The other slides are generated based on Slack posts.
+
+### CODE Learning Platform
+
+In the future, we plan to pull supplemental info about campus events and academic deadlines from the CODE Learning Platform (intranet of CODE University)

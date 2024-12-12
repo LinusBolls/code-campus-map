@@ -4,7 +4,10 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import { useEffect } from 'react';
 
+import CODELogo from '@/components/CODELogo';
+import FormattedSlackText from '@/components/FormattedSlackText';
 import ProgressBar from '@/components/ProgressBar/index';
+import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import useSlides from '@/useSlides';
 
 dayjs.extend(isBetween);
@@ -15,18 +18,19 @@ export default function Page() {
         currentSlideIndex,
         numSlides,
         slideDuration,
+        isLoadingSlides,
 
         goToNextSlide,
         goToPrevSlide,
+        togglePause,
     } = useSlides();
 
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
-            if (
-                e.key === 'ArrowRight' ||
-                e.key === 'ArrowDown' ||
-                e.key === ' '
-            ) {
+            if (e.key === ' ') {
+                togglePause();
+            }
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
                 goToNextSlide();
             }
             if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
@@ -38,8 +42,19 @@ export default function Page() {
         return () => window.removeEventListener('keydown', handleKeyPress);
     }, [goToNextSlide, goToPrevSlide]);
 
+    if (!currentSlide || isLoadingSlides) return null;
+
     return (
-        <>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+
+                width: '100vw',
+                height: '100vh',
+                overflow: 'hidden',
+            }}
+        >
             <ProgressBar
                 step={currentSlideIndex}
                 numSteps={numSlides}
@@ -50,51 +65,12 @@ export default function Page() {
                     gap: '10rem',
                 }}
             />
-            {currentSlide.jsx ?? (
-                <div
-                    style={{
-                        display: 'flex',
-                        height: '100vh',
-                        padding: '3rem',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        <h1 style={{ color: currentSlide.color }}>
-                            {currentSlide.title}
-                        </h1>
-                        <p style={{ whiteSpace: 'pre' }}>
-                            {currentSlide.description}
-                        </p>
-                    </div>
-                    {currentSlide.media?.map((media, idx) => {
-                        if (media.type.startsWith('image/'))
-                            return (
-                                <img
-                                    key={idx}
-                                    style={{ height: '50%' }}
-                                    src={media.src}
-                                    alt={media.alt}
-                                />
-                            );
-
-                        if (media.type.startsWith('video/'))
-                            return (
-                                <video
-                                    key={idx}
-                                    style={{ height: '50%' }}
-                                    src={media.src}
-                                    controls={false}
-                                    autoPlay
-                                />
-                            );
-                    })}
-                </div>
-            )}
-        </>
+            <CODELogo fill="#fff" style={{ width: '5rem' }} />
+            {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}
+            <div>
+                Add a slide to this screen by posting a message in
+                #campus-screen ツ
+            </div>
+        </div>
     );
 }

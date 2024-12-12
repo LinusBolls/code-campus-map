@@ -17,7 +17,19 @@ async function getUserInfo(userId?: string) {
 
     const { name, color } = user;
 
-    return { name, color: '#' + color };
+    return { id: userId, name, color: '#' + color };
+}
+async function getChannelInfo(channelId?: string) {
+    if (!channelId) return null;
+
+    const { channel } = await slack.conversations.info({
+        channel: channelId,
+    });
+    if (!channel) return null;
+
+    const { name } = channel;
+
+    return { id: channelId, name };
 }
 
 const toSlide = async (message: MessageElement): Promise<Slide> => {
@@ -28,12 +40,12 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
     const { emoji } = await slack.emoji.list();
 
     const allEmojisthatOccurrInMessage = message.blocks?.flatMap((block) => {
-        if (block.type === 'rich_text') {
+        if ('elements' in block) {
             return block.elements?.flatMap((element) => {
                 if (element.type === 'emoji') {
                     // @ts-expect-error this seems to work
                     return element.name;
-                } else if (element.type === 'rich_text_section') {
+                } else if ('elements' in element) {
                     return element.elements?.flatMap((element) => {
                         // @ts-expect-error this seems to work
                         if (element.type === 'emoji') {
@@ -48,6 +60,73 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
         }
     });
 
+    const allChannels = message.blocks?.flatMap((block) => {
+        if ('elements' in block) {
+            return block.elements?.flatMap((element) => {
+                if (element.type === 'channel') {
+                    // @ts-expect-error this seems to work
+                    return element.channel_id;
+                } else if ('elements' in element) {
+                    return element.elements?.flatMap((element) => {
+                        // @ts-expect-error this seems to work
+                        if (element.type === 'channel') {
+                            // @ts-expect-error this seems to work
+                            return element.channel_id;
+                        }
+                        return [];
+                    });
+                }
+                return [];
+            });
+        }
+    });
+
+    const allUsers = message.blocks?.flatMap((block) => {
+        if ('elements' in block) {
+            return block.elements?.flatMap((element) => {
+                if (element.type === 'user') {
+                    // @ts-expect-error this seems to work
+                    return element.user_id;
+                } else if ('elements' in element) {
+                    return element.elements?.flatMap((element) => {
+                        // @ts-expect-error this seems to work
+                        if (element.type === 'user') {
+                            // @ts-expect-error this seems to work
+                            return element.user_id;
+                        }
+                        return [];
+                    });
+                }
+                return [];
+            });
+        }
+    });
+
+    const usersArr = await Promise.all(
+        allUsers?.map(async (userId) => {
+            return await getUserInfo(userId);
+        }) ?? []
+    );
+    const usersRecord = usersArr.reduce((obj, i) => {
+        return {
+            ...obj,
+            [i?.id!]: { name: i?.name, color: i?.color },
+        };
+    }, {});
+
+    const channelsArr = await Promise.all(
+        allChannels?.map(async (channelId) => {
+            return await getChannelInfo(channelId);
+        }) ?? []
+    );
+
+    const channelsRecord = channelsArr.reduce((obj, i) => {
+        return {
+            ...obj,
+            [i?.id!]: { name: i?.name },
+        };
+    }, {});
+
     const emojis = emoji
         ? allEmojisthatOccurrInMessage?.reduce(
               (obj, i) => ({
@@ -57,8 +136,6 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
               {}
           )
         : undefined;
-
-    console.log(message.blocks?.[0]?.elements?.[0]?.elements);
 
     return {
         title: rawTitle.trim(),
@@ -75,6 +152,8 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
         postedBy: user?.name,
         blocks: message.blocks,
         emoji: emojis,
+        users: usersRecord,
+        channels: channelsRecord,
     };
 };
 
@@ -111,6 +190,8 @@ export type Slide = {
     postedBy?: string;
     blocks?: AssistantAppThreadBlock[];
     emoji?: Record<string, string>;
+    users?: Record<string, { name: string; color: string }>;
+    channels?: Record<string, { name: string }>;
 };
 
 export async function GET() {

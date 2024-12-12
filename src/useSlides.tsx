@@ -7,7 +7,7 @@ import { Config } from './config';
 import { useInterval } from './hooks/useInterval';
 
 export function useDynamicSlides() {
-    const slidesQuery = useQuery({
+    return useQuery({
         queryKey: ['slides'],
         queryFn: async () => {
             const res = await fetch('/api/screen/slides');
@@ -16,12 +16,11 @@ export function useDynamicSlides() {
         },
         refetchInterval: Config.SLIDES_REFETCH_INTERVAL,
     });
-
-    return { dynamicSlides: slidesQuery.data };
 }
 
 export default function useSlides() {
-    const { dynamicSlides } = useDynamicSlides();
+    const { data: dynamicSlides, isLoading: isLoadingSlides } =
+        useDynamicSlides();
 
     const mapSlides: Slide[] = [
         {
@@ -78,17 +77,22 @@ export default function useSlides() {
         setSlideInterval(null);
         setTimeout(() => setSlideInterval(Config.SLIDE_DURATION), 0);
     }
+    function togglePause() {
+        setSlideInterval((prev) => (prev ? null : Config.SLIDE_DURATION));
+    }
 
     useInterval(goToNextSlide, slideInterval);
 
-    const currentSlide = slides[currentSlideIndex];
+    const currentSlide = slides[currentSlideIndex] as Slide | undefined;
 
     return {
         currentSlide,
         currentSlideIndex,
         numSlides: slides.length,
         slideDuration: Config.SLIDE_DURATION,
+        isLoadingSlides,
         goToNextSlide: manuallyGoToNextSlide,
         goToPrevSlide: manuallyGoToPrevSlide,
+        togglePause,
     };
 }

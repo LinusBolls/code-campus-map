@@ -4,6 +4,12 @@ const assertEnvString = (value: unknown, key: string): string => {
 
     return value;
 };
+const assertEnvArray = (value: unknown, key: string): string[] => {
+    if (typeof value !== 'string')
+        throw new Error('Missing array value process.env.' + key);
+
+    return value.split(',');
+};
 
 class Env {
     public get client() {
@@ -34,6 +40,20 @@ class Env {
                 clientSecret: assertEnvString(
                     process.env.GOOGLE_CLIENT_SECRET,
                     'GOOGLE_CLIENT_SECRET'
+                ),
+            },
+            slack: {
+                token: assertEnvString(
+                    process.env.SLACK_APP_TOKEN,
+                    'SLACK_APP_TOKEN'
+                ),
+                channelId: assertEnvString(
+                    process.env.SLACK_CHANNEL_ID,
+                    'SLACK_CHANNEL_ID'
+                ),
+                adminUserIds: assertEnvArray(
+                    process.env.SLACK_ADMIN_USER_IDS,
+                    'SLACK_ADMIN_USER_IDS'
                 ),
             },
         };

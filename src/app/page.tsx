@@ -52,7 +52,11 @@ export default function Page() {
             />
             {currentSlide.jsx ?? (
                 <div
-                    style={{ display: 'flex', height: '100%', padding: '3rem' }}
+                    style={{
+                        display: 'flex',
+                        height: '100vh',
+                        padding: '3rem',
+                    }}
                 >
                     <div
                         style={{
@@ -67,13 +71,28 @@ export default function Page() {
                             {currentSlide.description}
                         </p>
                     </div>
-                    {currentSlide.media?.length && (
-                        <img
-                            style={{ height: '100%' }}
-                            src={currentSlide.media[0].src}
-                            alt={currentSlide.media[0].alt}
-                        />
-                    )}
+                    {currentSlide.media?.map((media, idx) => {
+                        if (media.type.startsWith('image/'))
+                            return (
+                                <img
+                                    key={idx}
+                                    style={{ height: '50%' }}
+                                    src={media.src}
+                                    alt={media.alt}
+                                />
+                            );
+
+                        if (media.type.startsWith('video/'))
+                            return (
+                                <video
+                                    key={idx}
+                                    style={{ height: '50%' }}
+                                    src={media.src}
+                                    controls={false}
+                                    autoPlay
+                                />
+                            );
+                    })}
                 </div>
             )}
         </>

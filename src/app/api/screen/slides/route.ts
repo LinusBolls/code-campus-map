@@ -1,4 +1,104 @@
+import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
+import { AssistantAppThreadBlock } from '@slack/web-api/dist/types/response/ChatPostMessageResponse';
+import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 import { NextResponse } from 'next/server';
+
+import { env } from '@/env';
+
+const slack = new WebClient(env.server.slack.token);
+
+async function getUserInfo(userId?: string) {
+    if (!userId) return null;
+
+    const { user } = await slack.users.info({
+        user: userId,
+    });
+    if (!user) return null;
+
+    const { name, color } = user;
+
+    return { name, color: '#' + color };
+}
+
+const toSlide = async (message: MessageElement): Promise<Slide> => {
+    const [rawTitle, ...rawDescription] = message.text?.split('\n') ?? [];
+
+    const user = await getUserInfo(message.user);
+
+    const { emoji } = await slack.emoji.list();
+
+    const allEmojisthatOccurrInMessage = message.blocks?.flatMap((block) => {
+        if (block.type === 'rich_text') {
+            return block.elements?.flatMap((element) => {
+                if (element.type === 'emoji') {
+                    // @ts-expect-error this seems to work
+                    return element.name;
+                } else if (element.type === 'rich_text_section') {
+                    return element.elements?.flatMap((element) => {
+                        // @ts-expect-error this seems to work
+                        if (element.type === 'emoji') {
+                            // @ts-expect-error this seems to work
+                            return element.name;
+                        }
+                        return [];
+                    });
+                }
+                return [];
+            });
+        }
+    });
+
+    const emojis = emoji
+        ? allEmojisthatOccurrInMessage?.reduce(
+              (obj, i) => ({
+                  ...obj,
+                  [i]: emoji[i],
+              }),
+              {}
+          )
+        : undefined;
+
+    console.log(message.blocks?.[0]?.elements?.[0]?.elements);
+
+    return {
+        title: rawTitle.trim(),
+        description: rawDescription.join('\n').trim(),
+        color: user?.color,
+        media: message.files?.map((i) => ({
+            type: i.mimetype!,
+            src:
+                env.server.host +
+                '/api/files?url=' +
+                encodeURIComponent(i.url_private_download!),
+            alt: i.alt_txt,
+        })),
+        postedBy: user?.name,
+        blocks: message.blocks,
+        emoji: emojis,
+    };
+};
+
+const hasReactionFromOneOTheseUsers = (
+    message: MessageElement,
+    reactionName: string,
+    userIds: string[]
+) => {
+    const reaction = message.reactions?.find((i) => i.name === reactionName);
+
+    const reactedWithReaction = reaction?.users?.some((i) =>
+        userIds.includes(i)
+    );
+
+    return reactedWithReaction;
+};
+
+const isPublished = (message: MessageElement) => {
+    return hasReactionFromOneOTheseUsers(
+        message,
+        'white_check_mark',
+        env.server.slack.adminUserIds
+    );
+};
 
 export type Slide = {
     jsx?: React.ReactElement;
@@ -7,53 +107,35 @@ export type Slide = {
     color?: string;
     description?: string;
     people?: string[];
-    media?: { type: 'image/png'; src: string; alt?: string }[];
+    media?: { type: string; src: string; alt?: string }[];
     postedBy?: string;
+    blocks?: AssistantAppThreadBlock[];
+    emoji?: Record<string, string>;
 };
-const slides: Slide[] = [
-    {
-        title: 'Scrap Secret Santa',
-        color: '#79014A',
-        description:
-            'Infos and Signing up on LP\n\n For questions, reach out to @Julien Kloevekorn',
-        people: [],
-        media: [],
-        postedBy: '',
-    },
-    {
-        title: 'Indian Cultural Evening + Movie Night!!',
-        color: '#061ABD',
-        description:
-            'Moday Dec 16th starting at 18:00 with presentation and food, followed by a film!\n\nFor questions, reach out to Andrew, Jeel, or Plad',
-        people: [],
-        media: [],
-        postedBy: '',
-    },
-    {
-        title: 'Winter Expo Day 13.12.',
-        color: '#0A7EA3',
-        description:
-            'Project Presentations\n15:00 - 15:30\n\nProject Exhitibion\n15:30 - 17:30\n\nGet-Together\n17:30',
-        people: [],
-        media: [],
-        postedBy: '',
-    },
-    {
-        title: 'Monday Movie Night',
-        color: '#C4A007',
-        description:
-            'Every Monday at 18:00 in the Lounge\n\nFor questions, reach out to @Andrew',
-        people: [],
-        media: [
-            // {
-            //     type: 'image/png',
-            //     src: '/movie-night-poster.png',
-            // },
-        ],
-        postedBy: '',
-    },
-];
 
 export async function GET() {
+    const publishedMessages = await fetchPublishedMessages();
+
+    const slides = await Promise.all(publishedMessages.map(toSlide));
+
     return NextResponse.json(slides);
+}
+
+export async function fetchPublishedMessages() {
+    const history = (await slack.conversations.history({
+        channel: env.server.slack.channelId,
+        oldest: '0',
+        limit: 10,
+    })) as ConversationsHistoryResponse;
+
+    const publishedMessages =
+        history.messages?.filter(
+            (i) =>
+                i.type === 'message' &&
+                i.subtype == null &&
+                i.text?.length &&
+                isPublished(i)
+        ) ?? [];
+
+    return publishedMessages;
 }

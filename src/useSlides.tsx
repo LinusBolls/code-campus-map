@@ -46,7 +46,7 @@ export default function useSlides() {
         },
     ];
 
-    const slides = [...mapSlides, ...(dynamicSlides || [])];
+    const slides: Slide[] = [...mapSlides, ...(dynamicSlides || [])];
 
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 

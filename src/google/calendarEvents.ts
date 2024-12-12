@@ -3,8 +3,8 @@ import dayjs from 'dayjs';
 export async function fetchGoogleCalendarEvents(
     accessToken: string,
     calendarIds: string[],
-    after: Date | dayjs.Dayjs = dayjs(),
-    before: Date | dayjs.Dayjs = dayjs().add(7, 'days')
+    after: Date | dayjs.Dayjs = dayjs().startOf('day'),
+    before: Date | dayjs.Dayjs = dayjs().endOf('day').add(7, 'days')
 ): Promise<CalendarEvent[]> {
     const eventRequests = calendarIds.map((calendarId) =>
         fetch(
@@ -31,7 +31,7 @@ export async function fetchGoogleCalendarEvents(
 
 export interface CalendarEvent {
     summary: string;
-    location: string;
+    location?: string;
     creator: {
         email: string;
     };
@@ -46,4 +46,12 @@ export interface CalendarEvent {
         dateTime: string;
         timeZone: string;
     };
+    status: 'confirmed';
+    transparency?: 'transparent';
+    attendees?: {
+        email: string;
+        displayName?: string;
+        resource?: boolean;
+        responseStatus?: 'declined' | 'accepted' | 'needsAction';
+    }[];
 }

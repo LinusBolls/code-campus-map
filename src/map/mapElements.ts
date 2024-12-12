@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { CalendarEvent } from '@/google';
+
 export const isLabel = (el: MapEl): el is LabelEl => 'label' in el;
 export const isRoom = (el: MapEl): el is RoomEl => 'id' in el;
 
@@ -39,30 +41,22 @@ export type LabelEl = z.infer<typeof LabelElSchema>;
 export type RoomEl = z.infer<typeof RoomElSchema>;
 export type MapEl = z.infer<typeof ElSchema>;
 
-/**
- * @param {string} googleLocation looks like `CODE-1-Cosmos | B.13 (1), CODE-1-Cosmos | A.13 (1)`
- */
-export const roomMatchesGoogleLocation = (
-    googleLocation: string,
-    room: MapEl
-) => {
+export const roomMatchesGoogleEvent = (event: CalendarEvent, room: MapEl) => {
     if (!isRoom(room)) return false;
 
-    return room.googleName === googleLocation;
+    if (
+        event.location &&
+        room.googleName &&
+        event.location?.includes(room.googleName)
+    )
+        return true;
 
-    // const rooms = googleLocation.split(", ");
+    // we don't check for attendee response status here because it will often be "declined" even if the room is booked for CODE's purposes
+    if (
+        room.googleName &&
+        event.attendees?.some((i) => i.displayName?.includes(room.googleName!))
+    )
+        return true;
 
-    // const roomInfos = rooms.map((i) => {
-    //   const [first, second] = i.split(" | ");
-
-    //   const name = first.replace("CODE-1-", "");
-
-    //   const nr = second.split(" ")[0];
-
-    //   return { name, nr };
-    // });
-    // return (
-    //   roomInfos.some((i) => room.rooms?.includes(i.nr)) ||
-    //   roomInfos.some((i) => i.name === room.name)
-    // );
+    return false;
 };

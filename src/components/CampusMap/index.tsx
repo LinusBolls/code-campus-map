@@ -45,10 +45,33 @@ export default function CampusMap({
         availableRoomIds,
         bookedRoomIds,
         roomsWithCurrentEvents,
+        roomsWithChildren,
     } = useMap();
 
     if (!availableRoomIds || !bookedRoomIds || !roomsWithCurrentEvents)
         return null;
+
+    // TODO: change the way we do the styling the selector specificity is sooo annoying here
+
+    const roomsWithChildrenStyles =
+        roomsWithChildren
+            ?.map((i) => {
+                const bookedChildren = i.children.filter((j) =>
+                    roomsWithCurrentEvents.includes(j.id)
+                );
+
+                if (bookedChildren.length === 0) return '';
+                if (bookedChildren.length === i.children.length)
+                    return `[js-data-id="${i.id}"]:not(.foobarbaz){fill:${theme.room.academicEvent} !important}[js-data-id="${i.id}"]:not(.foobarbaz) *{stroke:none}`;
+                return (
+                    `[js-data-id="${i.id}"]{display:none}` +
+                    bookedChildren.map(
+                        (j) =>
+                            `[js-data-id="${j.id}"]:not(.foobarbaz){fill:${theme.room.academicEvent} !important} [js-data-id="${j.id}"]:not(.foobarbaz) *{stroke:none}`
+                    )
+                );
+            })
+            ?.join('') ?? '';
 
     const bookingModeStyles = (
         <>
@@ -77,6 +100,7 @@ export default function CampusMap({
                         `[js-data-id="${i}"]{fill:${theme.room.academicEvent} !important}[js-data-id="${i}"] *{stroke:none}`
                 )
                 .join('')}
+            {roomsWithChildrenStyles}
         </>
     );
 

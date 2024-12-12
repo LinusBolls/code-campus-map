@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { Config } from './config';
 import { Google } from './google';
 import { GoogleCalendar } from './google.data';
-import { isRoom, roomMatchesGoogleLocation } from './map/mapElements';
+import { isRoom, RoomEl, roomMatchesGoogleEvent } from './map/mapElements';
 import { parseFloorplanInfoFromSvg } from './map/parsing';
 
 export default function useMapData() {
@@ -41,6 +41,7 @@ export default function useMapData() {
             return google.calendarEvents.get([
                 GoogleCalendar.CODE_COMMUNITY.id,
                 GoogleCalendar.CODE_LEARNING_PLATFORM.id,
+                GoogleCalendar.CODE_OS.id,
             ]);
         },
         refetchInterval: Config.CALENDAR_EVENTS_REFETCH_INTERVAL,
@@ -56,6 +57,17 @@ export default function useMapData() {
 
 export function useMap() {
     const { mapData, roomSchedules, calendarEvents } = useMapData();
+
+    const roomsWithChildren = mapData?.data
+        .filter(isRoom)
+        .map<RoomEl & { children: RoomEl[] }>((i) => {
+            const children = mapData?.data
+                .filter(isRoom)
+                .filter((j) => j.parent === i.id);
+
+            return { ...i, children };
+        })
+        .filter((i) => i.children.length > 0);
 
     if (!roomSchedules || !mapData || !calendarEvents)
         return {
@@ -89,8 +101,11 @@ export function useMap() {
     const roomsWithCurrentEvents = mapData.data
         .filter(isRoom)
         .filter((room) => {
-            const events = calendarEvents.filter((event) =>
-                roomMatchesGoogleLocation(event.location, room)
+            const events = calendarEvents.filter(
+                (event) =>
+                    roomMatchesGoogleEvent(event, room) &&
+                    dayjs(event.start.dateTime).isBefore(dayjs()) &&
+                    dayjs(event.end.dateTime).isAfter(dayjs())
             );
             return events.length > 0;
         })
@@ -101,5 +116,6 @@ export function useMap() {
         bookedRoomIds,
         roomsWithCurrentEvents,
         svgString: mapData.str,
+        roomsWithChildren,
     };
 }

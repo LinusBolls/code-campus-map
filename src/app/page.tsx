@@ -5,7 +5,6 @@ import isBetween from 'dayjs/plugin/isBetween';
 import { useEffect } from 'react';
 
 import CODELogo from '@/components/CODELogo';
-import FormattedSlackText from '@/components/FormattedSlackText';
 import ProgressBar from '@/components/ProgressBar/index';
 import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import useSlides from '@/useSlides';

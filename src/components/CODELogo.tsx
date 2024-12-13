@@ -1,4 +1,4 @@
-export interface CODELogoProps extends React.SVGProps<SVGSVGElement> {}
+export type CODELogoProps = React.SVGProps<SVGSVGElement>;
 export default function CODELogo(props: CODELogoProps) {
     return (
         <svg

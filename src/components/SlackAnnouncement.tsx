@@ -26,10 +26,7 @@ export const SlackAnnouncement: React.FC<SlackAnnouncementProps> = ({
                     flexDirection: 'column',
                 }}
             >
-                <FormattedSlackText
-                    blocks={post.blocks as any}
-                    entities={post}
-                />
+                <FormattedSlackText blocks={post.blocks!} entities={post} />
             </div>
             {post.media?.map((media, idx) => {
                 if (media.type.startsWith('image/'))

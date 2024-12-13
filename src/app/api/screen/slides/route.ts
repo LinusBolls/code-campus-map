@@ -110,7 +110,7 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
     const usersRecord = usersArr.reduce((obj, i) => {
         return {
             ...obj,
-            [i?.id!]: { name: i?.name, color: i?.color },
+            [i!.id]: { name: i?.name, color: i?.color },
         };
     }, {});
 
@@ -123,7 +123,7 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
     const channelsRecord = channelsArr.reduce((obj, i) => {
         return {
             ...obj,
-            [i?.id!]: { name: i?.name },
+            [i!.id]: { name: i?.name },
         };
     }, {});
 

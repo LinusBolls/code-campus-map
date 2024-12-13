@@ -21,7 +21,7 @@ type MessageBlock =
     | PurpleElement;
 
 interface FormattedSlackTextProps {
-    blocks: MessageBlock[];
+    blocks: AssistantAppThreadBlock[];
     entities?: Entities;
 }
 
@@ -117,16 +117,20 @@ const Block = ({
         case 'channel':
             jsx = (
                 <span className="slack-block-channel">
-                    {/* @ts-expect-error */}#
-                    {entities?.channels?.[block.channel_id]?.name}
+                    #
+                    {
+                        entities?.channels?.[
+                            (block as PurpleElement).channel_id!
+                        ]?.name
+                    }
                 </span>
             );
             break;
         case 'user':
             jsx = (
                 <span className="slack-block-user">
-                    {/* @ts-expect-error */}@
-                    {entities?.users?.[block.user_id]?.name}
+                    @
+                    {entities?.users?.[(block as PurpleElement).user_id!]?.name}
                 </span>
             );
             break;

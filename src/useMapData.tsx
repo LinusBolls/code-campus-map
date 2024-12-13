@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { Config } from './config';
 import { Google } from './google';
 import { GoogleCalendar } from './google.data';
-import { isRoom, RoomEl, roomMatchesGoogleEvent } from './map/mapElements';
+import { isRoom, roomMatchesGoogleEvent } from './map/mapElements';
 import { parseFloorplanInfoFromSvg } from './map/parsing';
 
 export default function useMapData() {

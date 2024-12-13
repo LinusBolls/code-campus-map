@@ -5,6 +5,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 import { useEffect } from 'react';
 
 import CODELogo from '@/components/CODELogo';
+import FormattedSlackText from '@/components/FormattedSlackText';
 import ProgressBar from '@/components/ProgressBar/index';
 import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import useSlides from '@/useSlides';
@@ -54,22 +55,52 @@ export default function Page() {
                 overflow: 'hidden',
             }}
         >
-            <ProgressBar
-                step={currentSlideIndex}
-                numSteps={numSlides}
-                fillDurationMs={slideDuration}
+            <div style={{ display: 'flex', padding: '2rem 3rem' }}>
+                <CODELogo fill="#fff" style={{ height: '5rem' }} />
+                <ProgressBar
+                    step={currentSlideIndex}
+                    numSteps={numSlides}
+                    fillDurationMs={slideDuration}
+                    style={{
+                        marginTop: '12px',
+                        paddingLeft: '3rem',
+                        gap: '10rem',
+                    }}
+                />
+            </div>
+
+            {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}
+            <FormattedSlackText
                 style={{
-                    width: '80%',
-                    margin: '2rem auto',
-                    gap: '10rem',
+                    padding: '1rem 2rem',
+                }}
+                blocks={[
+                    {
+                        // @ts-expect-error the typing is so fucked lol
+                        type: 'rich_text',
+                        elements: [
+                            {
+                                type: 'text',
+                                // @ts-expect-error the typing is so fucked lol
+                                text: 'Add your announcements to this screen by posting a message in ',
+                            },
+                            {
+                                type: 'channel',
+                                // @ts-expect-error the typing is so fucked lol
+                                channel_id: 'campusScreen',
+                            },
+                            {
+                                type: 'text',
+                                // @ts-expect-error the typing is so fucked lol
+                                text: ' ツ',
+                            },
+                        ],
+                    },
+                ]}
+                entities={{
+                    channels: { campusScreen: { name: 'campus-screen' } },
                 }}
             />
-            <CODELogo fill="#fff" style={{ width: '5rem' }} />
-            {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}
-            <div>
-                Add a slide to this screen by posting a message in
-                #campus-screen ツ
-            </div>
         </div>
     );
 }

@@ -8,48 +8,64 @@ export interface SlackAnnouncementProps {
 export const SlackAnnouncement: React.FC<SlackAnnouncementProps> = ({
     post,
 }) => {
+    const hasMedia = post.media?.length ?? 0 > 0;
+
     return (
         <div
             style={{
+                overflow: 'hidden',
+
                 display: 'flex',
+                justifyContent: 'space-around',
 
                 flex: 1,
-
                 padding: '3rem',
 
                 // fontSize: '2.5rem',
             }}
         >
-            <div
+            <FormattedSlackText
+                blocks={post.blocks!}
+                entities={post}
                 style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
-            >
-                <FormattedSlackText blocks={post.blocks!} entities={post} />
-            </div>
-            {post.media?.map((media, idx) => {
-                if (media.type.startsWith('image/'))
-                    return (
-                        <img
-                            key={idx}
-                            style={{ height: '50%' }}
-                            src={media.src}
-                            alt={media.alt}
-                        />
-                    );
+                    overflow: 'hidden',
 
-                if (media.type.startsWith('video/'))
-                    return (
-                        <video
-                            key={idx}
-                            style={{ height: '50%' }}
-                            src={media.src}
-                            controls={false}
-                            autoPlay
-                        />
-                    );
-            })}
+                    maxWidth: '42rem',
+                }}
+            />
+            {hasMedia && (
+                <div
+                    style={{
+                        overflow: 'hidden',
+
+                        maxWidth: '42rem',
+                        height: '100%',
+                    }}
+                >
+                    {post.media?.map((media, idx) => {
+                        if (media.type.startsWith('image/'))
+                            return (
+                                <img
+                                    key={idx}
+                                    style={{ height: '100%' }}
+                                    src={media.src}
+                                    alt={media.alt}
+                                />
+                            );
+
+                        if (media.type.startsWith('video/'))
+                            return (
+                                <video
+                                    key={idx}
+                                    style={{ height: '100%' }}
+                                    src={media.src}
+                                    controls={false}
+                                    autoPlay
+                                />
+                            );
+                    })}
+                </div>
+            )}
         </div>
     );
 };

@@ -87,16 +87,23 @@ export default function CampusMap({
                     ? `stroke:${stroke} !important;`
                     : 'stroke:none !important;';
 
-                return `[js-data-id="${i.id}"]{${fillStr}fill-opacity:1}[js-data-id="${i.id}"] *{${strokeStr}fill-opacity:1}`;
+                return `.campus-map.booking-mode [js-data-id="${i.id}"]{${fillStr}fill-opacity:1}.campus-map.booking-mode [js-data-id="${i.id}"] *{${strokeStr}fill-opacity:1}`;
             })
-            .join('') + `[js-data-id="off-limits"]{fill:none !important}`;
+            .join('') +
+        `.campus-map.booking-mode [js-data-id="off-limits"]{fill:none !important}`;
+
+    const isBookingMode = mode === MapDisplayMode.BOOKING;
 
     return (
         <>
-            <style>
-                {mode === MapDisplayMode.BOOKING && bookingModeStyles}
-            </style>
-            <div dangerouslySetInnerHTML={{ __html: svgString }} {...rest} />
+            <style>{isBookingMode && bookingModeStyles}</style>
+            <div
+                className={
+                    'campus-map ' + (isBookingMode ? ' booking-mode' : '')
+                }
+                dangerouslySetInnerHTML={{ __html: svgString }}
+                {...rest}
+            />
         </>
     );
 }

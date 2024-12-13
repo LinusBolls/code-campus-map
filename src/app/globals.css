@@ -20,10 +20,13 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-svg {
-    height: 100%;
+.campus-map svg {
+    width: 100%;
+    height: auto;
+
+    object-fit: contain;
 }
-svg * {
+.campus-map svg * {
     transition:
         fill 1s,
         stroke 1s !important;
@@ -129,3 +132,7 @@ ul li {
 ol li {
     list-style: decimal !important;
 }
+
+/* .formatted-slack-text > strong:first-child {
+    font-size: 2.5rem;
+} */

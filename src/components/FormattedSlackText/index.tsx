@@ -20,7 +20,7 @@ type MessageBlock =
     | AccessoryElement
     | PurpleElement;
 
-interface FormattedSlackTextProps {
+interface FormattedSlackTextProps extends React.HTMLAttributes<HTMLDivElement> {
     blocks: AssistantAppThreadBlock[];
     entities?: Entities;
 }
@@ -181,11 +181,17 @@ const Block = ({
 const FormattedSlackText: React.FC<FormattedSlackTextProps> = ({
     blocks,
     entities,
+    ...rest
 }) => {
     return (
         <div
             className="formatted-slack-text"
-            style={{ whiteSpace: 'pre-wrap', lineHeight: '1.5' }}
+            {...rest}
+            style={{
+                whiteSpace: 'pre-wrap',
+                lineHeight: '1.5',
+                ...(rest.style ?? {}),
+            }}
         >
             {blocks.map((i, idx) => (
                 <Block key={idx} block={i} entities={entities} />

@@ -57,16 +57,18 @@ export default function Page() {
         >
             <div style={{ display: 'flex', padding: '2rem 3rem' }}>
                 <CODELogo fill="#fff" style={{ height: '5rem' }} />
-                <ProgressBar
-                    step={currentSlideIndex}
-                    numSteps={numSlides}
-                    fillDurationMs={slideDuration}
-                    style={{
-                        marginTop: '12px',
-                        paddingLeft: '3rem',
-                        gap: '10rem',
-                    }}
-                />
+                {numSlides > 0 && (
+                    <ProgressBar
+                        step={currentSlideIndex}
+                        numSteps={numSlides}
+                        fillDurationMs={slideDuration}
+                        style={{
+                            marginTop: '12px',
+                            paddingLeft: '3rem',
+                            gap: '2rem',
+                        }}
+                    />
+                )}
             </div>
 
             {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}

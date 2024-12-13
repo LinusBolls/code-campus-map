@@ -69,20 +69,30 @@ export default function useSlides() {
         Config.SLIDE_DURATION
     );
 
+    const isPaused = slideInterval == null;
+
     function manuallyGoToNextSlide() {
         goToNextSlide();
-        // resetting the interval to reset the timeout of going to the next slide
-        setSlideInterval(null);
-        setTimeout(() => setSlideInterval(Config.SLIDE_DURATION), 0);
+        if (!isPaused) {
+            // resetting the interval to reset the timeout of going to the next slide
+            setSlideInterval(null);
+            setTimeout(() => setSlideInterval(Config.SLIDE_DURATION), 0);
+        }
     }
 
     function manuallyGoToPrevSlide() {
         goToPrevSlide();
-        // resetting the interval to reset the timeout of going to the next slide
-        setSlideInterval(null);
-        setTimeout(() => setSlideInterval(Config.SLIDE_DURATION), 0);
+        if (!isPaused) {
+            // resetting the interval to reset the timeout of going to the next slide
+            setSlideInterval(null);
+            setTimeout(() => setSlideInterval(Config.SLIDE_DURATION), 0);
+        }
     }
     function togglePause() {
+        const isUnpausing = slideInterval == null;
+        if (isUnpausing) {
+            goToNextSlide();
+        }
         setSlideInterval((prev) => (prev ? null : Config.SLIDE_DURATION));
     }
 
@@ -99,5 +109,6 @@ export default function useSlides() {
         goToNextSlide: manuallyGoToNextSlide,
         goToPrevSlide: manuallyGoToPrevSlide,
         togglePause,
+        isPaused,
     };
 }

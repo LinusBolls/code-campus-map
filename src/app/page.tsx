@@ -23,6 +23,7 @@ export default function Page() {
         goToNextSlide,
         goToPrevSlide,
         togglePause,
+        isPaused,
     } = useSlides();
 
     useEffect(() => {
@@ -55,7 +56,10 @@ export default function Page() {
                 overflow: 'hidden',
             }}
         >
-            <div style={{ display: 'flex', padding: '2rem 3rem' }}>
+            <div
+                className="slide-header"
+                style={{ display: 'flex', padding: '2rem 3rem' }}
+            >
                 <CODELogo fill="#fff" style={{ height: '5rem' }} />
                 {numSlides > 0 && (
                     <ProgressBar
@@ -67,6 +71,7 @@ export default function Page() {
                             paddingLeft: '3rem',
                             gap: '2rem',
                         }}
+                        isPaused={isPaused}
                     />
                 )}
             </div>

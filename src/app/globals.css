@@ -136,3 +136,10 @@ ol li {
 /* .formatted-slack-text > strong:first-child {
     font-size: 2.5rem;
 } */
+
+.progress-bar__hint {
+    display: none;
+}
+.slide-header:hover .progress-bar__hint {
+    display: block;
+}

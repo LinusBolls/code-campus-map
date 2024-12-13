@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { Config } from '@/config';
 import { env } from '@/env';
 import { fetchPublishedMessages } from '@/slack/fetchPublishedMessages';
 
@@ -26,5 +27,19 @@ export async function GET(req: NextRequest) {
             Authorization: 'Bearer ' + env.server.slack.token,
         },
     });
-    return new Response(res.body);
+    const headers = new Headers(res.headers);
+    headers.set(
+        'Cache-Control',
+        `public, max-age=${Config.FILE_CACHE_DURATION_MS / 1000}, immutable`
+    );
+    headers.set(
+        'Expires',
+        new Date(Date.now() + Config.FILE_CACHE_DURATION_MS).toUTCString()
+    );
+    headers.set('ETag', res.headers.get('ETag') || ''); // Optional: Use Slack's ETag
+    headers.set(
+        'Last-Modified',
+        res.headers.get('Last-Modified') || new Date().toUTCString()
+    );
+    return new Response(res.body, { headers, status: res.status });
 }

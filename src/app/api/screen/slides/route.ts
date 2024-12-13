@@ -1,9 +1,10 @@
-import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
+import { WebClient } from '@slack/web-api';
 import { AssistantAppThreadBlock } from '@slack/web-api/dist/types/response/ChatPostMessageResponse';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 import { NextResponse } from 'next/server';
 
 import { env } from '@/env';
+import { fetchPublishedMessages } from '@/slack/fetchPublishedMessages';
 
 const slack = new WebClient(env.server.slack.token);
 
@@ -157,28 +158,6 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
     };
 };
 
-const hasReactionFromOneOTheseUsers = (
-    message: MessageElement,
-    reactionName: string,
-    userIds: string[]
-) => {
-    const reaction = message.reactions?.find((i) => i.name === reactionName);
-
-    const reactedWithReaction = reaction?.users?.some((i) =>
-        userIds.includes(i)
-    );
-
-    return reactedWithReaction;
-};
-
-const isPublished = (message: MessageElement) => {
-    return hasReactionFromOneOTheseUsers(
-        message,
-        'white_check_mark',
-        env.server.slack.adminUserIds
-    );
-};
-
 export type Slide = {
     jsx?: React.ReactElement;
 
@@ -200,23 +179,4 @@ export async function GET() {
     const slides = await Promise.all(publishedMessages.map(toSlide));
 
     return NextResponse.json(slides);
-}
-
-export async function fetchPublishedMessages() {
-    const history = (await slack.conversations.history({
-        channel: env.server.slack.channelId,
-        oldest: '0',
-        limit: 10,
-    })) as ConversationsHistoryResponse;
-
-    const publishedMessages =
-        history.messages?.filter(
-            (i) =>
-                i.type === 'message' &&
-                i.subtype == null &&
-                i.text?.length &&
-                isPublished(i)
-        ) ?? [];
-
-    return publishedMessages;
 }

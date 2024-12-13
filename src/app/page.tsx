@@ -6,13 +6,17 @@ import { useEffect } from 'react';
 
 import CODELogo from '@/components/CODELogo';
 import FormattedSlackText from '@/components/FormattedSlackText';
+import { LoadingSpinner } from '@/components/LoadingSpinner';
 import ProgressBar from '@/components/ProgressBar/index';
 import { SlackAnnouncement } from '@/components/SlackAnnouncement';
+import { usePrefetchMapData } from '@/useMapData';
 import useSlides from '@/useSlides';
 
 dayjs.extend(isBetween);
 
 export default function Page() {
+    usePrefetchMapData();
+
     const {
         currentSlide,
         currentSlideIndex,
@@ -41,9 +45,22 @@ export default function Page() {
         window.addEventListener('keydown', handleKeyPress);
 
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [goToNextSlide, goToPrevSlide]);
+    }, [goToNextSlide, goToPrevSlide, togglePause]);
 
-    if (!currentSlide || isLoadingSlides) return null;
+    if (!currentSlide || isLoadingSlides)
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    minHeight: '100vh',
+                }}
+            >
+                <LoadingSpinner />
+            </div>
+        );
 
     return (
         <div

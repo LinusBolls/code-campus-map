@@ -1,10 +1,11 @@
 import { WebClient } from '@slack/web-api';
-import { AssistantAppThreadBlock } from '@slack/web-api/dist/types/response/ChatPostMessageResponse';
+import { AssistantAppThreadBlock } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 import { NextResponse } from 'next/server';
 
 import { env } from '@/env';
 import { fetchPublishedMessages } from '@/slack/fetchPublishedMessages';
+import { splitIntoTitleAndDescription } from '@/slack/splitIntoTitleAndDescription';
 
 const slack = new WebClient(env.server.slack.token);
 
@@ -33,12 +34,11 @@ async function getChannelInfo(channelId?: string) {
     return { id: channelId, name };
 }
 
-const toSlide = async (message: MessageElement): Promise<Slide> => {
-    const [rawTitle, ...rawDescription] = message.text?.split('\n') ?? [];
-
+const toSlide = async (
+    message: MessageElement,
+    emoji: Record<string, string>
+): Promise<Slide> => {
     const user = await getUserInfo(message.user);
-
-    const { emoji } = await slack.emoji.list();
 
     const allEmojisthatOccurrInMessage = message.blocks?.flatMap((block) => {
         if ('elements' in block) {
@@ -138,9 +138,13 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
           )
         : undefined;
 
+    const { title, description } = splitIntoTitleAndDescription(
+        message.blocks ?? []
+    );
+
     return {
-        title: rawTitle.trim(),
-        description: rawDescription.join('\n').trim(),
+        title,
+        description,
         color: user?.color,
         media: message.files?.map((i) => ({
             type: i.mimetype!,
@@ -161,9 +165,9 @@ const toSlide = async (message: MessageElement): Promise<Slide> => {
 export type Slide = {
     jsx?: React.ReactElement;
 
-    title?: string;
+    title?: AssistantAppThreadBlock[];
     color?: string;
-    description?: string;
+    description?: AssistantAppThreadBlock[];
     people?: string[];
     media?: { type: string; src: string; alt?: string }[];
     postedBy?: string;
@@ -176,7 +180,11 @@ export type Slide = {
 export async function GET() {
     const publishedMessages = await fetchPublishedMessages();
 
-    const slides = await Promise.all(publishedMessages.map(toSlide));
+    const emoji = await slack.emoji.list();
+
+    const slides = await Promise.all(
+        publishedMessages.map((i) => toSlide(i, emoji.emoji ?? {}))
+    );
 
     return NextResponse.json(slides);
 }

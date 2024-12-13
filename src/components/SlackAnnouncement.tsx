@@ -47,15 +47,38 @@ export const SlackAnnouncement: React.FC<SlackAnnouncementProps> = ({
                 // fontSize: '2.5rem',
             }}
         >
-            <FormattedSlackText
-                blocks={post.blocks!}
-                entities={post}
-                style={{
-                    overflow: 'hidden',
+            {post.title && post.description ? (
+                <>
+                    <FormattedSlackText
+                        blocks={post.title}
+                        entities={post}
+                        style={{
+                            overflow: 'hidden',
 
-                    width: '42rem',
-                }}
-            />
+                            width: '42rem',
+                        }}
+                    />
+                    <FormattedSlackText
+                        blocks={post.description}
+                        entities={post}
+                        style={{
+                            overflow: 'hidden',
+
+                            width: '42rem',
+                        }}
+                    />
+                </>
+            ) : (
+                <FormattedSlackText
+                    blocks={post.blocks!}
+                    entities={post}
+                    style={{
+                        overflow: 'hidden',
+
+                        width: '42rem',
+                    }}
+                />
+            )}
             {numMedia > 0 && (
                 <div
                     style={{

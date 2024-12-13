@@ -148,3 +148,7 @@ export function useMap() {
         rooms,
     };
 }
+
+export function usePrefetchMapData() {
+    useMap();
+}

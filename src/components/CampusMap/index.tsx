@@ -1,5 +1,7 @@
 import { RoomInfo, useMap } from '@/useMapData';
 
+import { LoadingSpinner } from '../LoadingSpinner';
+
 const grayTypes = [
     'terrace',
     'team-space',
@@ -75,7 +77,19 @@ export default function CampusMap({
     } = useMap();
 
     if (!availableRoomIds || !bookedRoomIds || !roomsWithCurrentEvents)
-        return null;
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '100%',
+                    minHeight: '100%',
+                }}
+            >
+                <LoadingSpinner />
+            </div>
+        );
 
     const bookingModeStyles =
         rooms

@@ -55,19 +55,21 @@ export default function useMapData() {
     };
 }
 
+export interface RoomInfo {
+    id: string;
+    parent?: RoomInfo;
+    children?: RoomInfo[];
+
+    bookableByStudents: boolean;
+    bookedByStudents: boolean;
+    bookableByStaff: boolean;
+    bookedByStaff: boolean;
+
+    type: string;
+}
+
 export function useMap() {
     const { mapData, roomSchedules, calendarEvents } = useMapData();
-
-    const roomsWithChildren = mapData?.data
-        .filter(isRoom)
-        .map<RoomEl & { children: RoomEl[] }>((i) => {
-            const children = mapData?.data
-                .filter(isRoom)
-                .filter((j) => j.parent === i.id);
-
-            return { ...i, children };
-        })
-        .filter((i) => i.children.length > 0);
 
     if (!roomSchedules || !mapData || !calendarEvents)
         return {
@@ -111,11 +113,38 @@ export function useMap() {
         })
         .map((i) => i.id);
 
+    const rooms =
+        mapData?.data.filter(isRoom).map<RoomInfo>((i) => {
+            return {
+                id: i.id,
+                type: i.type,
+                bookableByStudents: i.google != null,
+                bookedByStudents: bookedRoomIds.includes(i.id),
+                bookableByStaff: i.googleName != null,
+                bookedByStaff: roomsWithCurrentEvents.includes(i.id),
+            };
+        }) ?? [];
+
+    for (const room of rooms) {
+        const parent = mapData.data
+            .filter(isRoom)
+            .find((i) => i.id === room.id)?.parent;
+        if (parent) {
+            const parentRoom = rooms.find((i) => i.id === parent);
+            if (parentRoom) {
+                if (!parentRoom.children) {
+                    parentRoom.children = [];
+                }
+                parentRoom.children.push(room);
+            }
+        }
+    }
+
     return {
         availableRoomIds,
         bookedRoomIds,
         roomsWithCurrentEvents,
         svgString: mapData.str,
-        roomsWithChildren,
+        rooms,
     };
 }

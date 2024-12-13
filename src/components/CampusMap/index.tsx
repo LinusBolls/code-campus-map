@@ -1,10 +1,9 @@
-import { useMap } from '@/useMapData';
+import { RoomInfo, useMap } from '@/useMapData';
 
 const grayTypes = [
     'terrace',
     'team-space',
     'learning-units',
-    'open-space',
     'meetings',
     'meditation',
     'project',
@@ -27,6 +26,33 @@ const theme = {
     },
 };
 
+function getStyles(room: RoomInfo): { fill?: string; stroke?: string } {
+    if (room.children?.length) {
+        // room with children is only rendered if both children are in the same state
+        // if one child is booked and the other is not, the room is not rendered
+        // if both are the same state, the parent gets rendered over them
+        const bookedChildren = room.children?.filter((i) => i.bookedByStaff);
+
+        if (bookedChildren.length === 0)
+            return {
+                fill: room.id === 'cosmos' ? 'none' : theme.room.default,
+            };
+        if (bookedChildren.length === room.children.length) {
+            return { fill: theme.room.academicEvent };
+        }
+        return { fill: 'none' };
+    }
+    if (room.bookedByStudents) return { fill: theme.room.booked };
+    if (room.bookableByStudents) return { fill: theme.room.bookable };
+    if (room.bookedByStaff) return { fill: theme.room.academicEvent };
+    if (room.bookableByStaff && !['cosmos-1', 'cosmos-2'].includes(room.id))
+        return { fill: theme.room.onlyBookableByFaculty };
+
+    if (grayTypes.includes(room.type)) return { fill: theme.room.default };
+
+    return { fill: 'none' };
+}
+
 export enum MapDisplayMode {
     MAP = 'map',
     BOOKING = 'booking',
@@ -45,64 +71,25 @@ export default function CampusMap({
         availableRoomIds,
         bookedRoomIds,
         roomsWithCurrentEvents,
-        roomsWithChildren,
+        rooms,
     } = useMap();
 
     if (!availableRoomIds || !bookedRoomIds || !roomsWithCurrentEvents)
         return null;
 
-    // TODO: change the way we do the styling the selector specificity is sooo annoying here
+    const bookingModeStyles =
+        rooms
+            .map((i) => {
+                const { fill, stroke } = getStyles(i);
 
-    const roomsWithChildrenStyles =
-        roomsWithChildren
-            ?.map((i) => {
-                const bookedChildren = i.children.filter((j) =>
-                    roomsWithCurrentEvents.includes(j.id)
-                );
+                const fillStr = fill ? `fill:${fill} !important;` : '';
+                const strokeStr = stroke
+                    ? `stroke:${stroke} !important;`
+                    : 'stroke:none !important;';
 
-                if (bookedChildren.length === 0) return '';
-                if (bookedChildren.length === i.children.length)
-                    return `[js-data-id="${i.id}"]:not(.foobarbaz){fill:${theme.room.academicEvent} !important}[js-data-id="${i.id}"]:not(.foobarbaz) *{stroke:none}`;
-                return (
-                    `[js-data-id="${i.id}"]{display:none}` +
-                    bookedChildren.map(
-                        (j) =>
-                            `[js-data-id="${j.id}"]:not(.foobarbaz){fill:${theme.room.academicEvent} !important} [js-data-id="${j.id}"]:not(.foobarbaz) *{stroke:none}`
-                    )
-                );
+                return `[js-data-id="${i.id}"]{${fillStr}fill-opacity:1}[js-data-id="${i.id}"] *{${strokeStr}fill-opacity:1}`;
             })
-            ?.join('') ?? '';
-
-    const bookingModeStyles = (
-        <>
-            {`[js-data-id="off-limits"]{fill:none !important} [js-data-google-name]{fill:${theme.room.onlyBookableByFaculty} !important} [js-data-google-name] *{stroke:none}`}
-            {grayTypes
-                .map(
-                    (i) =>
-                        `[js-data-type="${i}"]:not([js-data-google-name]){fill:${theme.room.default} !important;stroke:none;} [js-data-type="${i}"]:not([js-data-google-name]) *{stroke:none;}`
-                )
-                .join('')}
-            {availableRoomIds
-                .map(
-                    (i) =>
-                        `[js-data-id="${i}"]{fill:${theme.room.bookable} !important}[js-data-id="${i}"] *{stroke:none}`
-                )
-                .join('')}
-            {bookedRoomIds
-                .map(
-                    (i) =>
-                        `[js-data-id="${i}"]{fill:${theme.room.booked} !important}[js-data-id="${i}"] *{stroke:none}`
-                )
-                .join('')}
-            {roomsWithCurrentEvents
-                .map(
-                    (i) =>
-                        `[js-data-id="${i}"]{fill:${theme.room.academicEvent} !important}[js-data-id="${i}"] *{stroke:none}`
-                )
-                .join('')}
-            {roomsWithChildrenStyles}
-        </>
-    );
+            .join('') + `[js-data-id="off-limits"]{fill:none !important}`;
 
     return (
         <>

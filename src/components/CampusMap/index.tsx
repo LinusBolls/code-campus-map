@@ -1,4 +1,5 @@
 import { RoomInfo, useMap } from '@/useMapData';
+import { useIsOnline } from '@/utils/useIsOnline';
 
 import { LoadingSpinner } from '../LoadingSpinner';
 
@@ -72,7 +73,7 @@ export default function CampusMap({
 
     const isBookingMode = mode === MapDisplayMode.BOOKING;
 
-    const isOffline = isBookingMode && query.isOffline;
+    const isOffline = !useIsOnline();
     const isError = isBookingMode && query.isError;
     const isLoading = isBookingMode && query.isLoading;
 

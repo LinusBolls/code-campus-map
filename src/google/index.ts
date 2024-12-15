@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 
 import { env } from '@/env';
-import { parseCookies } from '@/utils/parseCookies';
+import { useClientSideGoogleAuth } from '@/utils/parseCookies';
 
 import { fetchGoogleCalendarEvents } from './calendarEvents';
 import { fetchGoogleRoomSchedules } from './roomSchedules';
@@ -40,14 +40,12 @@ export class Google {
                 'Google.fromBrowserCookies: Cannot read cookies in non-browser environment'
             );
         }
-        const accessToken = parseCookies()['google:code-connect:access-token'];
-        const refreshToken =
-            parseCookies()['google:code-connect:refresh-token'];
-        const expiresAt = parseCookies()['google:code-connect:expires-at'];
-        if (!accessToken) {
+        const { isAuthenticated, accessToken, refreshToken, expiresAt } =
+            useClientSideGoogleAuth();
+        if (!isAuthenticated) {
             window.location.href = Google.getAuthUrl();
         }
-        return new Google(accessToken, refreshToken, dayjs(expiresAt));
+        return new Google(accessToken!, refreshToken, dayjs(expiresAt));
     }
     public static getAuthUrl() {
         const clientId = env.client.google.clientId;

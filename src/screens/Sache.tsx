@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
 
 import { LoadingScreen } from './LoadingScreen';
 
@@ -12,5 +13,15 @@ const DynamicView = dynamic(() => import('@/screens/View'), {
 });
 
 export const Sache: React.FC = () => {
+    useEffect(() => {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+                .register('/cache-offline-page.js')
+                .then(() => console.info('worker registered'))
+                .catch((err) =>
+                    console.error('failed to register worker:', err)
+                );
+        }
+    }, []);
     return <DynamicView />;
 };

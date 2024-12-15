@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
 
     const accessToken = data.access_token;
 
+    // data.expires_in will be 3599 seconds aka 1 hour
     const expiresAt = dayjs().add(data.expires_in, 'seconds');
 
     return NextResponse.json({ accessToken, expiresAt });

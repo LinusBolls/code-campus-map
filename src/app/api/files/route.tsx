@@ -41,6 +41,5 @@ export async function GET(req: NextRequest) {
         'Last-Modified',
         res.headers.get('Last-Modified') || new Date().toUTCString()
     );
-    console.log('content length:', headers.get('content-length'));
     return new NextResponse(res.body, { headers, status: res.status });
 }

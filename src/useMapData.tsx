@@ -6,31 +6,23 @@ import { Google } from './google';
 import { GoogleCalendar } from './google.data';
 import { isRoom, roomMatchesGoogleEvent } from './map/mapElements';
 import { parseFloorplanInfoFromSvg } from './map/parsing';
+import { svgString } from './map/svgString';
 
 export default function useMapData() {
-    const mapDataQuery = useQuery({
-        queryKey: ['mapData'],
-        queryFn: async () => {
-            const rawSvgRes = await fetch('/floorplan.svg');
+    const mapData = parseFloorplanInfoFromSvg(svgString);
 
-            const rawSvg = await rawSvgRes.text();
-
-            return parseFloorplanInfoFromSvg(rawSvg);
-        },
-    });
     const roomSchedulesQuery = useQuery({
         queryKey: ['roomSchedules'],
         queryFn: async () => {
             const google = Google.fromBrowserCookies();
 
-            const googleRoomIds = mapDataQuery
-                .data!.data.filter(isRoom)
+            const googleRoomIds = mapData.data
+                .filter(isRoom)
                 .map((i) => i.google)
                 .filter(Boolean) as string[];
 
             return google.roomSchedules.get(googleRoomIds);
         },
-        enabled: mapDataQuery.data != null,
         refetchInterval: Config.ROOM_SCHEDULES_REFETCH_INTERVAL,
     });
     const calendarEventsQuery = useQuery({
@@ -46,12 +38,20 @@ export default function useMapData() {
         },
         refetchInterval: Config.CALENDAR_EVENTS_REFETCH_INTERVAL,
     });
+    const isLoading =
+        roomSchedulesQuery.isLoading || calendarEventsQuery.isLoading;
+    const isError = roomSchedulesQuery.isError || calendarEventsQuery.isError;
+    const isOffline = roomSchedulesQuery.isError && calendarEventsQuery.isError;
 
     return {
-        mapData: mapDataQuery.data,
+        mapData,
         roomSchedules: roomSchedulesQuery.data,
         calendarEvents: calendarEventsQuery.data,
-        svgStr: mapDataQuery.data?.str,
+        query: {
+            isLoading,
+            isError,
+            isOffline,
+        },
     };
 }
 
@@ -69,27 +69,23 @@ export interface RoomInfo {
 }
 
 export function useMap() {
-    const { mapData, roomSchedules, calendarEvents } = useMapData();
-
-    if (!roomSchedules || !mapData || !calendarEvents)
-        return {
-            availableRoomIds: null,
-            bookedRoomIds: null,
-            roomsWithCurrentEvents: null,
-        };
-
-    const availableRoomIds = mapData.data
-        .filter(isRoom)
-        .filter((i) => i.google)
-        .map((i) => i.id);
+    const { mapData, roomSchedules, calendarEvents, query } = useMapData();
 
     const bookedRoomIds = mapData.data
         .filter(isRoom)
         .filter((i) => {
-            if (!i.google) return false;
+            if (!i.google || !roomSchedules) return false;
 
-            const schedule = roomSchedules.calendars[i.google!].busy;
+            const schedule = roomSchedules.calendars[i.google]?.busy;
 
+            if (!schedule) {
+                console.warn(
+                    '[useMap] No schedule for room:',
+                    i.google,
+                    roomSchedules.calendars
+                );
+                return false;
+            }
             const isCurrentlyBooked = schedule.some((i) => {
                 const start = dayjs(i.start);
                 const end = dayjs(i.end);
@@ -103,6 +99,8 @@ export function useMap() {
     const roomsWithCurrentEvents = mapData.data
         .filter(isRoom)
         .filter((room) => {
+            if (!calendarEvents) return false;
+
             const events = calendarEvents.filter(
                 (event) =>
                     roomMatchesGoogleEvent(event, room) &&
@@ -114,7 +112,7 @@ export function useMap() {
         .map((i) => i.id);
 
     const rooms =
-        mapData?.data.filter(isRoom).map<RoomInfo>((i) => {
+        mapData.data.filter(isRoom).map<RoomInfo>((i) => {
             return {
                 id: i.id,
                 type: i.type,
@@ -141,11 +139,9 @@ export function useMap() {
     }
 
     return {
-        availableRoomIds,
-        bookedRoomIds,
-        roomsWithCurrentEvents,
         svgString: mapData.str,
         rooms,
+        query,
     };
 }
 

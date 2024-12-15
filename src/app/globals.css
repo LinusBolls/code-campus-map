@@ -43,7 +43,9 @@ body {
 .formatted-slack-text {
     font-size: 15px;
 
-    line-height: 22px;
+    line-height: 23px;
+
+    /* font-size: 3rem; */
 }
 
 .formatted-slack-text a {
@@ -52,11 +54,11 @@ body {
 }
 
 .formatted-slack-text code {
-    padding: 1px 3px;
+    padding: 0.07em 0.21em;
 
     line-height: 18px;
 
-    border-radius: 3px;
+    border-radius: 0.21em;
 
     color: rgb(232, 145, 45);
     background: rgba(232, 232, 232, 0.04);
@@ -143,3 +145,7 @@ ol li {
 .slide-header:hover .progress-bar__hint {
     display: block;
 }
+
+/* .formatted-slack-text * {
+    display: inline-block;
+} */

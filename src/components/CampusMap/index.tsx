@@ -68,28 +68,13 @@ export default function CampusMap({
     mode = MapDisplayMode.MAP,
     ...rest
 }: CampusMapProps) {
-    const {
-        svgString,
-        availableRoomIds,
-        bookedRoomIds,
-        roomsWithCurrentEvents,
-        rooms,
-    } = useMap();
+    const { svgString, rooms, query } = useMap();
 
-    if (!availableRoomIds || !bookedRoomIds || !roomsWithCurrentEvents)
-        return (
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    minHeight: '100%',
-                }}
-            >
-                <LoadingSpinner />
-            </div>
-        );
+    const isBookingMode = mode === MapDisplayMode.BOOKING;
+
+    const isOffline = isBookingMode && query.isOffline;
+    const isError = isBookingMode && query.isError;
+    const isLoading = isBookingMode && query.isLoading;
 
     const bookingModeStyles =
         rooms
@@ -106,18 +91,37 @@ export default function CampusMap({
             .join('') +
         `.campus-map.booking-mode [js-data-id="off-limits"]{fill:none !important}`;
 
-    const isBookingMode = mode === MapDisplayMode.BOOKING;
-
     return (
-        <>
-            <style>{isBookingMode && bookingModeStyles}</style>
+        <div {...rest} style={{ position: 'relative', ...rest.style }}>
+            <style>
+                {isBookingMode && bookingModeStyles}
+                {isBookingMode &&
+                    (isOffline || isError) &&
+                    `.campus-map.booking-mode svg {opacity: 0.3}`}
+            </style>
             <div
+                style={
+                    {
+                        // opacity: isBookingMode && isLoading ? 0 : 1,
+                    }
+                }
                 className={
                     'campus-map ' + (isBookingMode ? ' booking-mode' : '')
                 }
                 dangerouslySetInnerHTML={{ __html: svgString }}
-                {...rest}
             />
-        </>
+            {isBookingMode && (isOffline || isError) && (
+                <div className="absolute flex items-center justify-center w-full h-full left-0 top-0">
+                    <span className="px-4 py-3 font-bold text-black bg-white text-2xl uppercase">
+                        {isOffline ? 'Offline' : 'Error'}
+                    </span>
+                </div>
+            )}
+            {isBookingMode && isLoading && (
+                <div className="absolute flex items-center justify-center w-full h-full left-0 top-0">
+                    <LoadingSpinner />
+                </div>
+            )}
+        </div>
     );
 }

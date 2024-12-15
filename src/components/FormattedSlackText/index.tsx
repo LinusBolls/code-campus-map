@@ -149,27 +149,31 @@ const Block = ({
         case 'emoji':
             block = block as PurpleElement;
 
-            if (entities?.emoji?.[block.name!]) {
-                jsx = (
-                    <img
-                        src={entities.emoji[block.name!]}
-                        alt={block.name}
-                        style={{
-                            width: '22px',
-                            height: '22px',
-                            marginTop: '-11px',
-                        }}
-                    />
-                );
-            } else {
-                jsx = (
-                    <span role="img" aria-label={block.name || ''}>
-                        {block.unicode
-                            ? String.fromCodePoint(parseInt(block.unicode, 16))
-                            : ''}
-                    </span>
-                );
-            }
+            // if (entities?.emoji?.[block.name!]) {
+            jsx = (
+                <img
+                    src={
+                        entities?.emoji?.[block.name!] ||
+                        `https://a.slack-edge.com/production-standard-emoji-assets/14.0/apple-medium/${block.unicode}@2x.png`
+                    }
+                    alt={block.name}
+                    style={{
+                        width: '1.47em',
+                        height: '1.47em',
+                        marginTop: '-11px',
+                        display: 'inline',
+                    }}
+                />
+            );
+            // } else {
+            //     jsx = (
+            //         <span role="img" aria-label={block.name || ''}>
+            //             {block.unicode
+            //                 ? String.fromCodePoint(parseInt(block.unicode, 16))
+            //                 : ''}
+            //         </span>
+            //     );
+            // }
             break;
 
         default:
@@ -183,6 +187,7 @@ const FormattedSlackText: React.FC<FormattedSlackTextProps> = ({
     entities,
     ...rest
 }) => {
+    console.log(blocks, entities?.emoji);
     return (
         <div
             className="formatted-slack-text"

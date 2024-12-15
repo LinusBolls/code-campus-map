@@ -78,7 +78,7 @@ export default function Page() {
                 style={{ display: 'flex', padding: '2rem 3rem' }}
             >
                 <CODELogo fill="#fff" style={{ height: '5rem' }} />
-                {numSlides > 0 && (
+                {numSlides > 1 && (
                     <ProgressBar
                         step={currentSlideIndex}
                         numSteps={numSlides}
@@ -97,6 +97,8 @@ export default function Page() {
             <FormattedSlackText
                 style={{
                     padding: '1rem 2rem',
+
+                    fontSize: '15px',
                 }}
                 blocks={[
                     {

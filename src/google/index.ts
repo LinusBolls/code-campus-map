@@ -41,6 +41,7 @@ export class Google {
             );
         }
         const { isAuthenticated, accessToken, refreshToken, expiresAt } =
+            // eslint-disable-next-line react-hooks/rules-of-hooks
             useClientSideGoogleAuth();
         if (!isAuthenticated) {
             window.location.href = Google.getAuthUrl();

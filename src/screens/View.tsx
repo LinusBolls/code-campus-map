@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 
 import CODELogo from '@/components/CODELogo';
 import FormattedSlackText from '@/components/FormattedSlackText';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import ProgressBar from '@/components/ProgressBar/index';
 import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import { usePrefetchMapData } from '@/useMapData';
@@ -25,7 +24,6 @@ export default function View() {
         currentSlideIndex,
         numSlides,
         slideDuration,
-        isLoadingSlides,
 
         goToNextSlide,
         goToPrevSlide,

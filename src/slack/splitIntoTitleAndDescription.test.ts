@@ -246,6 +246,7 @@ describe('splitIntoTitleAndDescription', () => {
                         },
                     ],
                 },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ] as any)
         ).toEqual({
             title: [

@@ -1,4 +1,4 @@
-export const LoadingSpinner = ({ className }: { className?: string }) => {
+export const LoadingSpinner = ({}: { className?: string }) => {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"

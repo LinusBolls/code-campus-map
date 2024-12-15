@@ -11,6 +11,7 @@ import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import { usePrefetchMapData } from '@/useMapData';
 import useSlides from '@/useSlides';
 import { useClientSideGoogleAuth } from '@/utils/parseCookies';
+import { useIsOnline } from '@/utils/useIsOnline';
 
 import { LoadingScreen } from './LoadingScreen';
 
@@ -58,7 +59,7 @@ export default function View() {
 
     if (!currentSlide) return <LoadingScreen />;
 
-    const isOffline = !navigator.onLine;
+    const isOffline = !useIsOnline();
 
     return (
         <div
@@ -85,9 +86,8 @@ export default function View() {
                         numSteps={numSlides}
                         fillDurationMs={slideDuration}
                         style={{
-                            marginTop: '12px',
                             paddingLeft: '3rem',
-                            gap: '2rem',
+                            gap: '0.25rem',
                         }}
                         isPaused={isPaused}
                     />

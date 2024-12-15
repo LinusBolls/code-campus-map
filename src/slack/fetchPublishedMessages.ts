@@ -2,6 +2,7 @@ import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 
 import { Slide } from '@/app/api/screen/slides/route';
+import { Config } from '@/config';
 import { env } from '@/env';
 
 import { splitIntoTitleAndDescription } from './splitIntoTitleAndDescription';
@@ -176,18 +177,36 @@ const hasReactionFromOneOTheseUsers = (
 };
 
 const isPublished = (message: MessageElement) => {
-    return hasReactionFromOneOTheseUsers(
+    if (!message.user) return false;
+
+    const isApprovedByAuthor = hasReactionFromOneOTheseUsers(
+        message,
+        'white_check_mark',
+        [message.user]
+    );
+    const isApprovedByAdmin = hasReactionFromOneOTheseUsers(
         message,
         'white_check_mark',
         env.server.slack.adminUserIds
     );
+    const isVetoedByAdmin = hasReactionFromOneOTheseUsers(
+        message,
+        'x',
+        env.server.slack.adminUserIds
+    );
+
+    if (Config.POSTS_REQUIRE_APPROVAL) {
+        return isApprovedByAuthor && isApprovedByAdmin;
+    } else {
+        return isApprovedByAuthor && !isVetoedByAdmin;
+    }
 };
 
 export async function fetchPublishedMessages() {
     const history = (await slack.conversations.history({
         channel: env.server.slack.channelId,
         oldest: '0',
-        limit: 10,
+        limit: 99,
     })) as ConversationsHistoryResponse;
 
     const publishedMessages =

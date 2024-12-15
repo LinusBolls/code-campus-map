@@ -51,6 +51,8 @@ export default function View() {
 
     const { isAuthenticated } = useClientSideGoogleAuth();
 
+    const isOffline = !useIsOnline();
+
     if (!isAuthenticated) {
         router.push('/login');
 
@@ -58,8 +60,6 @@ export default function View() {
     }
 
     if (!currentSlide) return <LoadingScreen />;
-
-    const isOffline = !useIsOnline();
 
     return (
         <div

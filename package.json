@@ -13,7 +13,7 @@
         "ci:format": "npm run format:check",
         "ci:lint": "npm run lint",
         "ci:test": "TEST_ENV=CI npm run test",
-        "ci:build": "npm run build"
+        "ci:build": "dotenv -e .env.example -- next build"
     },
     "dependencies": {
         "@slack/web-api": "^7.8.0",
@@ -32,6 +32,7 @@
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "dotenv-cli": "^7.4.4",
         "eslint": "^8",
         "eslint-config-next": "15.0.4",
         "jsdom": "^25.0.1",

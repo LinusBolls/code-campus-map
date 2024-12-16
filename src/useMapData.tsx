@@ -7,6 +7,7 @@ import { GoogleCalendar } from './google.data';
 import { isRoom, roomMatchesGoogleEvent } from './map/mapElements';
 import { parseFloorplanInfoFromSvg } from './map/parsing';
 import { svgString } from './map/svgString';
+import { useIsOnline } from './utils/useIsOnline';
 
 export default function useMapData() {
     const mapData = parseFloorplanInfoFromSvg(svgString);
@@ -41,7 +42,7 @@ export default function useMapData() {
     const isLoading =
         roomSchedulesQuery.isLoading || calendarEventsQuery.isLoading;
     const isError = roomSchedulesQuery.isError || calendarEventsQuery.isError;
-    const isOffline = roomSchedulesQuery.isError && calendarEventsQuery.isError;
+    const isOffline = !useIsOnline();
 
     return {
         mapData,

@@ -11,6 +11,8 @@ import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import { usePrefetchMapData } from '@/useMapData';
 import useSlides from '@/useSlides';
 import { useClientSideGoogleAuth } from '@/utils/parseCookies';
+import { useApiHealth } from '@/utils/useApiHealth';
+import { useIsOnline } from '@/utils/useIsOnline';
 
 import { LoadingScreen } from './LoadingScreen';
 
@@ -18,6 +20,8 @@ export default function View() {
     const router = useRouter();
 
     usePrefetchMapData();
+
+    useApiHealth();
 
     const {
         currentSlide,
@@ -50,6 +54,8 @@ export default function View() {
 
     const { isAuthenticated } = useClientSideGoogleAuth();
 
+    const isOffline = !useIsOnline();
+
     if (!isAuthenticated) {
         router.push('/login');
 
@@ -57,8 +63,6 @@ export default function View() {
     }
 
     if (!currentSlide) return <LoadingScreen />;
-
-    const isOffline = !navigator.onLine;
 
     return (
         <div
@@ -85,9 +89,8 @@ export default function View() {
                         numSteps={numSlides}
                         fillDurationMs={slideDuration}
                         style={{
-                            marginTop: '12px',
                             paddingLeft: '3rem',
-                            gap: '2rem',
+                            gap: '0.25rem',
                         }}
                         isPaused={isPaused}
                     />

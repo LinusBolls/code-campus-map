@@ -2,6 +2,7 @@ import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse';
 
 import { cache as redisCache } from '@/backend/cache';
+import { Config } from '@/config';
 import { env } from '@/env';
 
 const hasReactionFromOneOTheseUsers = (
@@ -19,11 +20,29 @@ const hasReactionFromOneOTheseUsers = (
 };
 
 const isPublished = (message: MessageElement) => {
-    return hasReactionFromOneOTheseUsers(
+    if (!message.user) return false;
+
+    const isApprovedByAuthor = hasReactionFromOneOTheseUsers(
+        message,
+        'white_check_mark',
+        [message.user]
+    );
+    const isApprovedByAdmin = hasReactionFromOneOTheseUsers(
         message,
         'white_check_mark',
         env.server.slack.adminUserIds
     );
+    const isVetoedByAdmin = hasReactionFromOneOTheseUsers(
+        message,
+        'x',
+        env.server.slack.adminUserIds
+    );
+
+    if (Config.POSTS_REQUIRE_APPROVAL) {
+        return isApprovedByAuthor && isApprovedByAdmin;
+    } else {
+        return isApprovedByAuthor && !isVetoedByAdmin;
+    }
 };
 
 class Slack {

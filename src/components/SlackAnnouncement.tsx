@@ -48,7 +48,7 @@ export const SlackAnnouncement: React.FC<SlackAnnouncementProps> = ({
             }}
         >
             {post.title && post.description ? (
-                <>
+                <div className="flex flex-col">
                     <FormattedSlackText
                         blocks={post.title}
                         entities={post}
@@ -67,7 +67,7 @@ export const SlackAnnouncement: React.FC<SlackAnnouncementProps> = ({
                             width: '42rem',
                         }}
                     />
-                </>
+                </div>
             ) : (
                 <FormattedSlackText
                     blocks={post.blocks!}

@@ -28,6 +28,9 @@ class Env {
     }
     public get server() {
         return {
+            redis: {
+                url: assertEnvString(process.env.REDIS_URL, 'REDIS_URL'),
+            },
             host: assertEnvString(
                 process.env.NEXT_PUBLIC_HOST,
                 'NEXT_PUBLIC_HOST'

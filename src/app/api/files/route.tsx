@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { Config } from '@/config';
 import { env } from '@/env';
-import { fetchPublishedMessages } from '@/slack/fetchPublishedMessages';
+import { slack } from '@/slack/slack';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     if (!url) {
         return NextResponse.json({ error: 'Url is missing' }, { status: 400 });
     }
-    const publishedMessages = await fetchPublishedMessages();
+    const publishedMessages = await slack.publishedPosts.getAll();
 
     if (
         !publishedMessages.some((i) =>

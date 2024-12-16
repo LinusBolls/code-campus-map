@@ -1,19 +1,16 @@
-import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsHistoryResponse';
 
 import { Slide } from '@/app/api/screen/slides/route';
 import { env } from '@/env';
 
+import { slack } from './slack';
 import { splitIntoTitleAndDescription } from './splitIntoTitleAndDescription';
-
-const slack = new WebClient(env.server.slack.token);
 
 async function getUserInfo(userId?: string) {
     if (!userId) return null;
 
-    const { user } = await slack.users.info({
-        user: userId,
-    });
+    const user = await slack.users.get(userId);
+
     if (!user) return null;
 
     const { name, color } = user;
@@ -23,9 +20,8 @@ async function getUserInfo(userId?: string) {
 async function getChannelInfo(channelId?: string) {
     if (!channelId) return null;
 
-    const { channel } = await slack.conversations.info({
-        channel: channelId,
-    });
+    const channel = await slack.channels.get(channelId);
+
     if (!channel) return null;
 
     const { name } = channel;
@@ -161,54 +157,13 @@ const toSlide = async (
     };
 };
 
-const hasReactionFromOneOTheseUsers = (
-    message: MessageElement,
-    reactionName: string,
-    userIds: string[]
-) => {
-    const reaction = message.reactions?.find((i) => i.name === reactionName);
-
-    const reactedWithReaction = reaction?.users?.some((i) =>
-        userIds.includes(i)
-    );
-
-    return reactedWithReaction;
-};
-
-const isPublished = (message: MessageElement) => {
-    return hasReactionFromOneOTheseUsers(
-        message,
-        'white_check_mark',
-        env.server.slack.adminUserIds
-    );
-};
-
-export async function fetchPublishedMessages() {
-    const history = (await slack.conversations.history({
-        channel: env.server.slack.channelId,
-        oldest: '0',
-        limit: 10,
-    })) as ConversationsHistoryResponse;
-
-    const publishedMessages =
-        history.messages?.filter(
-            (i) =>
-                i.type === 'message' &&
-                i.subtype == null &&
-                i.text?.length &&
-                isPublished(i)
-        ) ?? [];
-
-    return publishedMessages;
-}
-
 export async function getSlides() {
-    const publishedMessages = await fetchPublishedMessages();
+    const publishedMessages = await slack.publishedPosts.getAll();
 
-    const emoji = await slack.emoji.list();
+    const emoji = await slack.emoji.getAll();
 
     const slides = await Promise.all(
-        publishedMessages.map((i) => toSlide(i, emoji.emoji ?? {}))
+        publishedMessages.map((i) => toSlide(i, emoji))
     );
     return slides;
 }

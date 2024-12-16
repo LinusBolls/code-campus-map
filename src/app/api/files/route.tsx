@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { Config } from '@/config';
-import { env } from '@/env';
 import { slack } from '@/slack/slack';
 
 export async function GET(req: NextRequest) {

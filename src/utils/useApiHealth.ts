@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 import packageJson from '../../package.json';
 import { SECOND } from './time';
@@ -37,7 +37,7 @@ export function useApiHealth() {
         clientVersion !== query.data.version;
 
     if (clientIsOutdated) {
-        router.reload();
+        router.refresh();
     }
     const isConnected = query.error == null;
     const isHealthy = query.data?.ok ?? false;

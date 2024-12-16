@@ -1,7 +1,7 @@
 import { ConversationsHistoryResponse, WebClient } from '@slack/web-api';
 import { MessageElement } from '@slack/web-api/dist/types/response/ConversationsRepliesResponse';
 
-import { cache as redisCache } from '@/backend/cache';
+import { FileResponse, cache as redisCache } from '@/backend/cache';
 import { Config } from '@/config';
 import { env } from '@/env';
 
@@ -131,6 +131,46 @@ class Slack {
             return publishedPosts;
         },
     };
+    public files = {
+        get: async (url: string): Promise<FileResponse | null> => {
+            const publishedPosts = await this.publishedPosts.getAll();
+
+            const isAllowedToFetch = publishedPosts.some((i) =>
+                i.files?.some((f) => f.url_private_download === url)
+            );
+            if (!isAllowedToFetch) return null;
+
+            const cachedData = await this.cache.slack.files.get(url);
+
+            console.log('cachedData: ', cachedData);
+
+            if (cachedData) return cachedData;
+
+            const res = await fetch(url, {
+                headers: {
+                    Authorization: 'Bearer ' + env.server.slack.token,
+                },
+            });
+            const buffer = await res.arrayBuffer();
+
+            const data: FileResponse = {
+                headers: serializeHeaders(res.headers),
+                buffer,
+            };
+            await this.cache.slack.files.set(url, data);
+
+            return data;
+        },
+    };
 }
 
 export const slack = new Slack();
+
+const serializeHeaders = (headers: Headers) => {
+    const headersObj: Record<string, string> = {};
+
+    headers.forEach((value, key) => {
+        headersObj[key] = value;
+    });
+    return headersObj;
+};

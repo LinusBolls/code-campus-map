@@ -3,6 +3,11 @@ import { commandOptions, createClient } from 'redis';
 
 import { env } from '@/env';
 
+export type FileResponse = {
+    headers: Record<string, string>;
+    buffer: ArrayBuffer | null;
+};
+
 class Cache {
     public getConnectionState = async (): Promise<{
         ok: boolean;
@@ -29,6 +34,9 @@ class Cache {
     }
 
     private async connect() {
+        this.redis.on('error', (err) => {
+            console.error('[cache] redis error:', err);
+        });
         await this.redis.connect();
     }
 
@@ -79,14 +87,31 @@ class Cache {
             },
         },
         files: {
-            get: async (fileId: string) => {
-                return await this.redis.hGetAll(
+            get: async (fileId: string): Promise<FileResponse | null> => {
+                const bufferRes = await this.redis.hGetAll(
                     commandOptions({ returnBuffers: true }),
-                    `slack:file:${fileId}`
+                    `slack:file-data:${fileId}`
                 );
+
+                const buffer = bufferRes?.buffer?.buffer as ArrayBuffer;
+
+                const info: { headers: Record<string, string> } = JSON.parse(
+                    (await this.redis.get(`slack:file:${fileId}`)) || 'null'
+                );
+                if (!buffer || !info) return null;
+
+                return { ...info, buffer };
             },
-            set: async (fileId: string, file: Buffer) => {
-                await this.redis.set(`slack:file:${fileId}`, file);
+            set: async (fileId: string, file: FileResponse) => {
+                await this.redis.hSet(
+                    `slack:file-data:${fileId}`,
+                    'buffer',
+                    Buffer.from(file.buffer!)
+                );
+                await this.redis.set(
+                    `slack:file:${fileId}`,
+                    JSON.stringify({ headers: file.headers })
+                );
             },
         },
         publishedPosts: {

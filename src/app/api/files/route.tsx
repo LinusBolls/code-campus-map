@@ -22,11 +22,12 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
 
-    const res = await fetch(url, {
-        headers: {
-            Authorization: 'Bearer ' + env.server.slack.token,
-        },
-    });
+    const res = await slack.files.get(url);
+
+    if (!res) {
+        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    }
+
     const headers = new Headers(res.headers);
     headers.set(
         'Cache-Control',
@@ -36,10 +37,10 @@ export async function GET(req: NextRequest) {
         'Expires',
         new Date(Date.now() + Config.FILE_CACHE_DURATION_MS).toUTCString()
     );
-    headers.set('ETag', res.headers.get('ETag') || ''); // Optional: Use Slack's ETag
+    headers.set('ETag', res.headers['ETag'] || ''); // Optional: Use Slack's ETag
     headers.set(
         'Last-Modified',
-        res.headers.get('Last-Modified') || new Date().toUTCString()
+        res.headers['Last-Modified'] || new Date().toUTCString()
     );
-    return new NextResponse(res.body, { headers, status: res.status });
+    return new NextResponse(res.buffer, { headers });
 }

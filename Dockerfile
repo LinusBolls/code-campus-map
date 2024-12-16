@@ -19,5 +19,7 @@ COPY --from=builder /app/public ./public
 
 RUN npm install --omit=dev --frozen-lockfile
 
+COPY .env ./ 
+
 EXPOSE 3000
 CMD ["npm", "start"]

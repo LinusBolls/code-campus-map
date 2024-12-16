@@ -11,6 +11,7 @@ import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import { usePrefetchMapData } from '@/useMapData';
 import useSlides from '@/useSlides';
 import { useClientSideGoogleAuth } from '@/utils/parseCookies';
+import { useApiHealth } from '@/utils/useApiHealth';
 import { useIsOnline } from '@/utils/useIsOnline';
 
 import { LoadingScreen } from './LoadingScreen';
@@ -19,6 +20,8 @@ export default function View() {
     const router = useRouter();
 
     usePrefetchMapData();
+
+    useApiHealth();
 
     const {
         currentSlide,

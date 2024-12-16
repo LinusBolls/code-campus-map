@@ -83,7 +83,6 @@ class Cache {
                     JSON.stringify(channel),
                     { EX: 60 }
                 );
-                await this.redis.expire(`slack:channel:${channelId}`, 10);
             },
         },
         files: {

@@ -65,47 +65,22 @@ export default function View() {
     if (!currentSlide) return <LoadingScreen />;
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-
-                width: '100vw',
-                height: '100vh',
-                overflow: 'hidden',
-            }}
-        >
-            <div
-                className="slide-header"
-                style={{ display: 'flex', padding: '2rem 3rem' }}
-            >
-                <CODELogo
-                    fill="#fff"
-                    style={{ width: '22rem', flexShrink: 0 }}
-                />
+        <div className="flex flex-col w-screen h-screen overflow-hidden">
+            <div className="flex py-8 px-12 slide-header">
+                <CODELogo className="fill-black dark:fill-white w-96 flex-shrink-0" />
                 {numSlides > 1 && (
                     <ProgressBar
+                        className="pl-6 gap-1"
                         step={currentSlideIndex}
                         numSteps={numSlides}
                         fillDurationMs={slideDuration}
-                        style={{
-                            paddingLeft: '3rem',
-                            gap: '0.25rem',
-                        }}
                         isPaused={isPaused}
                     />
                 )}
             </div>
 
             {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}
-            <div
-                style={{
-                    display: 'flex',
-                    alignItems: 'center',
-
-                    padding: '1rem 2rem',
-                }}
-            >
+            <div className="flex items-center px-8 py-4">
                 <FormattedSlackText
                     style={{
                         fontSize: '15px',
@@ -138,16 +113,7 @@ export default function View() {
                     }}
                 />
                 {isOffline && (
-                    <span
-                        style={{
-                            display: 'flex',
-                            gap: '1rem',
-                            fontWeight: 600,
-                            color: '#ccc',
-
-                            marginLeft: 'auto',
-                        }}
-                    >
+                    <span className="text-sm flex ml-auth gap-4 items-center font-semibold text-gray-400 dark:text-gray-600">
                         <WifiOff />
                         Offline
                     </span>

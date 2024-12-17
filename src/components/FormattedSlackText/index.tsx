@@ -189,7 +189,7 @@ const FormattedSlackText: React.FC<FormattedSlackTextProps> = ({
 }) => {
     return (
         <div
-            className="formatted-slack-text"
+            className="formatted-slack-text text-gray-800 dark:text-white"
             {...rest}
             style={{
                 whiteSpace: 'pre-wrap',

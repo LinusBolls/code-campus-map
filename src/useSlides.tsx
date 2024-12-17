@@ -35,25 +35,11 @@ export default function useSlides() {
     const mapSlides: Slide[] = [
         {
             jsx: (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-around',
-                        flex: 1,
-                    }}
-                >
+                <div className="flex items-center justify-around flex-1">
+                    <CampusMap className="w-2/5" mode={MapDisplayMode.MAP} />
                     <CampusMap
-                        mode={MapDisplayMode.MAP}
-                        style={{
-                            width: '40%',
-                        }}
-                    />
-                    <CampusMap
+                        className="w-2/5"
                         mode={MapDisplayMode.BOOKING}
-                        style={{
-                            width: '40%',
-                        }}
                     />
                 </div>
             ),

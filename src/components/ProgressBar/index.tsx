@@ -34,7 +34,10 @@ const ProgressBar = ({
             <div
                 {...rest}
                 className={
-                    'progress-bar' + (isPaused ? ' progress-bar--paused' : '')
+                    'progress-bar flex w-full h-2 overflow-hidden' +
+                    (isPaused ? ' progress-bar--paused' : '') +
+                    ' ' +
+                    (rest.className ?? '')
                 }
                 style={{
                     // @ts-expect-error custom css variable
@@ -47,9 +50,9 @@ const ProgressBar = ({
                     .map((_, idx) => (
                         <div
                             key={idx}
-                            className={`progress-section ${idx === progress ? 'fill' : ''}`}
+                            className={`progress-section ${idx === progress ? 'fill' : ''} flex items-center justify-center flex-1 font-bold relative rounded-full overflow-hidden bg-gray-300 dark:bg-gray-900`}
                         >
-                            <div className="content" />
+                            <div className="content bg-gray-800 dark:bg-gray-600 h-full w-0 left-0 top-0 absolute" />
                         </div>
                     ))}
             </div>

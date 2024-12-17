@@ -21,6 +21,7 @@ export const ALLOWED_ROOM_TYPES = [
     'elevators',
     'restrooms',
     'stairwell',
+    'subtenant',
 ] as const;
 
 export const LabelElSchema = z.object({
@@ -34,6 +35,7 @@ export const RoomElSchema = z.object({
     rooms: z.array(z.string()).optional(),
     parent: z.string().optional(),
     googleName: z.string().optional(),
+    subtenant: z.string().optional(),
 });
 export const ElSchema = z.union([LabelElSchema, RoomElSchema]);
 

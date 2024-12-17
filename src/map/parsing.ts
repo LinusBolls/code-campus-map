@@ -16,7 +16,7 @@ export function parseFloorplanInfoFromSvg(svgString: string) {
 
     if (topLevelElements.length === 0) {
         throw new Error(
-            'parseFloorplanInfoFromSvg: No top level elements found in svg: ' +
+            'parseFloorplanInfoFromSvg: No top level elements found in svg. Did you remember to enable the "Include \'id\' attribute" option in the Figma export? ' +
                 svgString
         );
     }

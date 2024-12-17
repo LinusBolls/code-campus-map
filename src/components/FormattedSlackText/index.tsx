@@ -187,7 +187,6 @@ const FormattedSlackText: React.FC<FormattedSlackTextProps> = ({
     entities,
     ...rest
 }) => {
-    console.log(blocks, entities?.emoji);
     return (
         <div
             className="formatted-slack-text"

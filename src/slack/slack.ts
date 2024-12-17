@@ -142,8 +142,6 @@ class Slack {
 
             const cachedData = await this.cache.slack.files.get(url);
 
-            console.log('cachedData: ', cachedData);
-
             if (cachedData) return cachedData;
 
             const res = await fetch(url, {

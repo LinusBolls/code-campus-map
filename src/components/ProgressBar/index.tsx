@@ -23,14 +23,7 @@ const ProgressBar = ({
     }, [step]);
 
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-
-                width: '100%',
-            }}
-        >
+        <div className="flex flex-col w-full">
             <div
                 {...rest}
                 className={

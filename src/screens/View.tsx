@@ -66,11 +66,11 @@ export default function View() {
 
     return (
         <div className="flex flex-col w-screen h-screen overflow-hidden">
-            <div className="flex py-8 px-12 slide-header">
-                <CODELogo className="fill-black dark:fill-white w-96 flex-shrink-0" />
+            <div className="flex flex-col md:flex-row py-8 px-12 gap-6 slide-header">
+                <CODELogo className="fill-black dark:fill-white w-96 max-w-full flex-shrink-0" />
                 {numSlides > 1 && (
                     <ProgressBar
-                        className="pl-6 gap-1"
+                        className="gap-1"
                         step={currentSlideIndex}
                         numSteps={numSlides}
                         fillDurationMs={slideDuration}

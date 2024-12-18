@@ -135,6 +135,8 @@ export function useMap() {
                     parentRoom.children = [];
                 }
                 parentRoom.children.push(room);
+
+                room.parent = parentRoom;
             }
         }
     }

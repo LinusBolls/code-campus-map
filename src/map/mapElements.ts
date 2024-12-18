@@ -24,6 +24,8 @@ export const ALLOWED_ROOM_TYPES = [
     'subtenant',
 ] as const;
 
+export type RoomType = (typeof ALLOWED_ROOM_TYPES)[number];
+
 export const LabelElSchema = z.object({
     label: z.string(),
 });

@@ -78,6 +78,7 @@ export const mapTheme = {
     },
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getMapModeStyles(room: RoomInfo, theme: 'light' | 'dark') {
     return room.parent || ['cantina', 'cosmos'].includes(room.id)
         ? { style: { fill: 'none', stroke: 'none' } }

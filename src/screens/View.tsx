@@ -57,6 +57,8 @@ export default function View() {
 
     const isOffline = !useIsOnline();
 
+    const { theme, toggleTheme } = useTheme();
+
     if (!isAuthenticated) {
         router.push('/login');
 
@@ -64,8 +66,6 @@ export default function View() {
     }
 
     if (!currentSlide) return <LoadingScreen />;
-
-    const { theme, toggleTheme } = useTheme();
 
     return (
         <div className="flex flex-col w-screen h-screen overflow-hidden">

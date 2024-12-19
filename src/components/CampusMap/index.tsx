@@ -1,4 +1,5 @@
 import { useMap } from '@/useMapData';
+import { useTheme } from '@/useTheme';
 import { useIsOnline } from '@/utils/useIsOnline';
 
 import { LoadingSpinner } from '../LoadingSpinner';
@@ -20,6 +21,8 @@ export default function CampusMap({
 }: CampusMapProps) {
     const { rooms, query } = useMap();
 
+    const { theme } = useTheme();
+
     const isBookingMode = mode === MapDisplayMode.BOOKING;
 
     const isOffline = !useIsOnline();
@@ -28,9 +31,9 @@ export default function CampusMap({
 
     const roomStyles = rooms.reduce<MapRoomStyles>((acc, room) => {
         if (isBookingMode) {
-            acc[room.id] = getBookingModeStyles(room);
+            acc[room.id] = getBookingModeStyles(room, theme);
         } else {
-            acc[room.id] = getMapModeStyles(room);
+            acc[room.id] = getMapModeStyles(room, theme);
         }
         return acc;
     }, {});

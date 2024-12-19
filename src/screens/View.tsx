@@ -1,6 +1,6 @@
 'use client';
 
-import { WifiOff } from 'lucide-react';
+import { Moon, Sun, WifiOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -10,6 +10,7 @@ import ProgressBar from '@/components/ProgressBar/index';
 import { SlackAnnouncement } from '@/components/SlackAnnouncement';
 import { usePrefetchMapData } from '@/useMapData';
 import useSlides from '@/useSlides';
+import { useTheme } from '@/useTheme';
 import { useClientSideGoogleAuth } from '@/utils/parseCookies';
 import { useApiHealth } from '@/utils/useApiHealth';
 import { useIsOnline } from '@/utils/useIsOnline';
@@ -64,9 +65,11 @@ export default function View() {
 
     if (!currentSlide) return <LoadingScreen />;
 
+    const { theme, toggleTheme } = useTheme();
+
     return (
         <div className="flex flex-col w-screen h-screen overflow-hidden">
-            <div className="flex flex-col md:flex-row py-8 px-12 gap-6 slide-header">
+            <div className="flex flex-col md:flex-row py-8 px-12 gap-6 group">
                 <CODELogo className="fill-black dark:fill-white w-96 max-w-full flex-shrink-0" />
                 {numSlides > 1 && (
                     <ProgressBar
@@ -77,6 +80,12 @@ export default function View() {
                         isPaused={isPaused}
                     />
                 )}
+                <button
+                    onClick={toggleTheme}
+                    className="hidden group-hover:flex text-gray-700"
+                >
+                    {theme === 'dark' ? <Sun /> : <Moon />}
+                </button>
             </div>
 
             {currentSlide?.jsx ?? <SlackAnnouncement post={currentSlide} />}

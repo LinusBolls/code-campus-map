@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { cookies } from 'next/headers';
 
 import { WithQueryClientProvider } from '@/components/WithQueryClientProvider';
 
@@ -19,16 +20,22 @@ const geistMono = localFont({
 export const metadata: Metadata = {
     title: 'CODE Campus Map',
     description: 'View the live state of the CODE Campus',
+    openGraph: {
+        title: 'CODE Campus Map',
+        siteName: 'CODE Campus Map',
+    },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const theme = (await cookies()).get('theme')?.value || 'light';
+
     return (
         <WithQueryClientProvider>
-            <html lang="en" className="dark">
+            <html lang="en" className={theme}>
                 <body
                     className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-black`}
                 >

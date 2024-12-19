@@ -3,9 +3,10 @@ import { Google } from '@/google';
 type CookieName =
     | 'google:code-connect:access-token'
     | 'google:code-connect:expires-at'
-    | 'google:code-connect:refresh-token';
+    | 'google:code-connect:refresh-token'
+    | 'theme';
 
-const parseCookies = (
+export const parseCookies = (
     cookies = document.cookie
 ): Record<CookieName, string | undefined> => {
     return cookies.split('; ').reduce((acc: Record<string, string>, cookie) => {

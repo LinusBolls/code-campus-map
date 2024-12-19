@@ -49,15 +49,7 @@ const ProgressBar = ({
                         </div>
                     ))}
             </div>
-            <span
-                className="progress-bar__hint"
-                style={{
-                    textAlign: 'center',
-                    color: '#333',
-                    marginTop: '1rem',
-                    cursor: 'default',
-                }}
-            >
+            <span className="justify-center w-full mt-4 cursor-default hidden group-hover:flex text-gray-700">
                 Use the space bar to pause and the arrow keys to switch slides
             </span>
         </div>
